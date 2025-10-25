@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AgendaActivity">
+
+    <CalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textTotalSemana"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/calendarView"
+        android:layout_marginTop="8dp"
+        android:text="Total da Semana: R$ 0,00" />
+
+    <TextView
+        android:id="@+id/textTotalMes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textTotalSemana"
+        android:layout_marginTop="4dp"
+        android:text="Total do Mês: R$ 0,00" />
+
+    <TextView
+        android:id="@+id/textTotalAno"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textTotalMes"
+        android:layout_marginTop="4dp"
+        android:text="Total do Ano: R$ 0,00" />
+
+    <TextView
+        android:id="@+id/textViewDica"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textTotalAno"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:text="Dica: Pressione e segure um agendamento para editar ou apagar."
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <ExpandableListView
+        android:id="@+id/expandableListViewAgendamentos"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/textViewDica"
+        android:layout_marginTop="8dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdicionarAgendamento"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="?attr/colorPrimary"
+        app:tint="@android:color/white" />
+
+</RelativeLayout>
