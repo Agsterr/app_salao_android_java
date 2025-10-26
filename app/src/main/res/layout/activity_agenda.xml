@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".AgendaActivity">
 
     <CalendarView
@@ -17,15 +18,37 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/calendarView"
         android:layout_marginTop="8dp"
-        android:text="Total da Semana: R$ 0,00" />
+        android:text="Total da Semana: R$ 0,00"
+        android:textColor="#000000" />
+
+    <!-- Novo: Total do Dia -->
+    <TextView
+        android:id="@+id/textTotalDia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textTotalSemana"
+        android:layout_marginTop="4dp"
+        android:text="Total do Dia: R$ 0,00"
+        android:textColor="#000000" />
+
+    <Button
+        android:id="@+id/buttonSairAgenda"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Voltar"
+        android:layout_below="@id/calendarView"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp" />
 
     <TextView
         android:id="@+id/textTotalMes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/textTotalSemana"
+        android:layout_below="@id/textTotalDia"
         android:layout_marginTop="4dp"
-        android:text="Total do Mês: R$ 0,00" />
+        android:text="Total do Mês: R$ 0,00"
+        android:textColor="#000000" />
 
     <TextView
         android:id="@+id/textTotalAno"
@@ -33,13 +56,22 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/textTotalMes"
         android:layout_marginTop="4dp"
-        android:text="Total do Ano: R$ 0,00" />
+        android:text="Total do Ano: R$ 0,00"
+        android:textColor="#000000" />
+
+    <!-- Novo: Spinner de filtro de status -->
+    <Spinner
+        android:id="@+id/spinnerStatusFilter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textTotalAno"
+        android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/textViewDica"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/textTotalAno"
+        android:layout_below="@id/spinnerStatusFilter"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
         android:text="Dica: Pressione e segure um agendamento para editar ou apagar."

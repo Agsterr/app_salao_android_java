@@ -11,7 +11,8 @@
         android:id="@+id/editTextNomeServico"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nome do Serviço" />
+        android:hint="Nome do Serviço"
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/editTextTempoServico"
@@ -19,19 +20,29 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="Tempo (em minutos)"
-        android:inputType="number" />
+        android:inputType="number"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/buttonSalvarServico"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Salvar Serviço" />
+        android:text="Serviço" />
+
+    <TextView
+        android:id="@+id/textViewListaServicosLegenda"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lista de serviços"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp" />
 
     <ListView
         android:id="@+id/listViewServicos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="8dp" />
 
 </LinearLayout>

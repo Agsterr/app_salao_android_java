@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+import android.graphics.Color;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -39,15 +40,15 @@ public class AgendaExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        final Agendamento agendamento = (Agendamento) getChild(groupPosition, childPosition);
-
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.list_item_agenda, null);
         }
 
+        Agendamento agendamento = (Agendamento) getChild(groupPosition, childPosition);
         TextView textViewHorario = convertView.findViewById(R.id.textViewHorario);
         TextView textViewServico = convertView.findViewById(R.id.textViewServico);
+        TextView textViewStatus = convertView.findViewById(R.id.textViewStatus);
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
         Date horaInicio = new Date(agendamento.getDataHoraInicio());
@@ -59,12 +60,22 @@ public class AgendaExpandableListAdapter extends BaseExpandableListAdapter {
         String horario = sdf.format(horaInicio) + " - " + sdf.format(horaFim);
         textViewHorario.setText(horario);
 
-        // Formata o valor pago como moeda (pt-BR)
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         String valorFormatado = currencyFormatter.format(agendamento.getValor());
 
-        // Exibe serviço e valor pago
         textViewServico.setText("Serviço: " + agendamento.getNomeServico() + " • Valor: " + valorFormatado);
+
+        String status = agendamento.getStatus();
+        textViewStatus.setText("Status: " + status);
+        if ("Cancelado".equals(status)) {
+            textViewStatus.setTextColor(Color.parseColor("#E53935"));
+        } else if ("Em andamento".equals(status)) {
+            textViewStatus.setTextColor(Color.parseColor("#1976D2"));
+        } else if ("Finalizado".equals(status)) {
+            textViewStatus.setTextColor(Color.parseColor("#4CAF50"));
+        } else {
+            textViewStatus.setTextColor(Color.parseColor("#616161"));
+        }
 
         return convertView;
     }
@@ -99,12 +110,14 @@ public class AgendaExpandableListAdapter extends BaseExpandableListAdapter {
 
         TextView textViewClientName = convertView.findViewById(R.id.textViewClientName);
 
-        // Calcula o valor total dos agendamentos do cliente neste grupo
+        // Calcula o valor total dos agendamentos do cliente neste grupo (ignorando cancelados)
         double totalCliente = 0.0;
         List<Agendamento> agendamentosDoCliente = listDataChild.get(headerTitle);
         if (agendamentosDoCliente != null) {
             for (Agendamento a : agendamentosDoCliente) {
-                totalCliente += a.getValor();
+                if (!a.isCancelado() && a.getValor() > 0) {
+                    totalCliente += a.getValor();
+                }
             }
         }
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));

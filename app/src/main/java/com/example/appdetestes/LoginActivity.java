@@ -12,17 +12,46 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.pm.PackageManager;
+import android.content.ComponentName;
+import androidx.appcompat.app.AlertDialog;
+import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Icon;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
+import android.os.Build;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Collections;
+
+import android.widget.SimpleAdapter;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText editTextUsuario;
     private EditText editTextSenha;
     private Button buttonLogin;
+    private Button buttonAlterarSenha;
     private CheckBox checkBoxLembrar;
+    private ActivityResultLauncher<String> imagePickerLauncher;
 
     private static final String PREFS_NAME = "AppDeTestesPrefs";
-    private static final String PREF_USUARIO = "usuario";
-    private static final String PREF_SENHA = "senha";
+    private static final String PREF_USUARIO = "usuario"; // apenas para lembrar preenchimento
+    private static final String PREF_SENHA = "senha";     // apenas para lembrar preenchimento
     private static final String PREF_LEMBRAR = "lembrar";
+
+    // Credenciais configuradas pelo usuário (persistência real de login)
+    private static final String PREF_CONFIG_USUARIO = "config_usuario";
+    private static final String PREF_CONFIG_SENHA = "config_senha";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,13 +61,33 @@ public class LoginActivity extends AppCompatActivity {
         editTextUsuario = findViewById(R.id.editTextUsuario);
         editTextSenha = findViewById(R.id.editTextSenha);
         buttonLogin = findViewById(R.id.buttonLogin);
+        buttonAlterarSenha = findViewById(R.id.buttonAlterarSenha);
         checkBoxLembrar = findViewById(R.id.checkBoxLembrar);
 
+        // Inicializa seletor de imagem da galeria
+        imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (uri != null) {
+                handleImageUri(uri);
+            }
+        });
+
+        // Botões para trocar ícone do app
+        Button buttonIconPadrao = findViewById(R.id.buttonIconPadrao);
+        Button buttonIconAlternativo = findViewById(R.id.buttonIconAlternativo);
+        if (buttonIconPadrao != null && buttonIconAlternativo != null) {
+            buttonIconPadrao.setOnClickListener(v -> setIconVariant(false));
+            buttonIconAlternativo.setOnClickListener(v -> showIconAltOptions());
+        }
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 login();
             }
+        });
+
+        buttonAlterarSenha.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, ChangePasswordActivity.class);
+            startActivity(intent);
         });
 
         carregarCredenciais();
@@ -62,12 +111,11 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = prefs.edit();
 
         if (checkBoxLembrar.isChecked()) {
-            // Salva as credenciais
+            // Salva apenas para preencher automaticamente (não é a credencial oficial)
             editor.putString(PREF_USUARIO, editTextUsuario.getText().toString());
             editor.putString(PREF_SENHA, editTextSenha.getText().toString());
             editor.putBoolean(PREF_LEMBRAR, true);
         } else {
-            // Limpa as credenciais salvas
             editor.remove(PREF_USUARIO);
             editor.remove(PREF_SENHA);
             editor.remove(PREF_LEMBRAR);
@@ -80,16 +128,163 @@ public class LoginActivity extends AppCompatActivity {
         String usuario = editTextUsuario.getText().toString();
         String senha = editTextSenha.getText().toString();
 
-        // Lógica de autenticação simples
+        // Sempre permite mestre: admin/admin
         if (usuario.equals("admin") && senha.equals("admin")) {
-            salvarOuLimparCredenciais();
+            autenticarComSucesso();
+            return;
+        }
 
-            // Redireciona diretamente para a tela principal
-            Intent intent = new Intent(LoginActivity.this, ClienteActivity.class);
-            startActivity(intent);
-            finish();
+        // Caso contrário, verifica credenciais configuradas pelo usuário
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String configUsuario = prefs.getString(PREF_CONFIG_USUARIO, "");
+        String configSenha = prefs.getString(PREF_CONFIG_SENHA, "");
+
+        if (!configUsuario.isEmpty() && !configSenha.isEmpty() &&
+                usuario.equals(configUsuario) && senha.equals(configSenha)) {
+            autenticarComSucesso();
         } else {
             Toast.makeText(this, "Usuário ou senha inválidos", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void autenticarComSucesso() {
+        salvarOuLimparCredenciais();
+        Intent intent = new Intent(LoginActivity.this, ClienteActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void showIconAltOptions() {
+        List<Map<String, String>> items = new ArrayList<>();
+        Map<String, String> m1 = new HashMap<>();
+        m1.put("title", "Alternativa 1: Ícone alternativo padrão");
+        m1.put("subtitle", "Troca o launcher para 'LauncherAlt' com recurso azul.");
+        items.add(m1);
+        Map<String, String> m2 = new HashMap<>();
+        m2.put("title", "Alternativa 2: Selecionar da galeria");
+        m2.put("subtitle", "Cria atalho com ícone personalizado da sua galeria.");
+        items.add(m2);
+        Map<String, String> m3 = new HashMap<>();
+        m3.put("title", "Alternativa 3: Importar da internet (URL)");
+        m3.put("subtitle", "Cria atalho usando imagem obtida por link.");
+        items.add(m3);
+
+        SimpleAdapter adapter = new SimpleAdapter(
+                this,
+                items,
+                R.layout.dialog_list_item_two_line,
+                new String[]{"title", "subtitle"},
+                new int[]{android.R.id.text1, android.R.id.text2}
+        );
+
+        new AlertDialog.Builder(this)
+                .setTitle("Ícone Alternativo — opções")
+                .setAdapter(adapter, (dialog, which) -> {
+                    if (which == 0) {
+                        setIconVariant(true);
+                    } else if (which == 1) {
+                        imagePickerLauncher.launch("image/*");
+                    } else if (which == 2) {
+                        showUrlInputDialog();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void showUrlInputDialog() {
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint("https://exemplo.com/icone.png");
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
+        new AlertDialog.Builder(this)
+                .setTitle("Importar ícone da internet")
+                .setView(input)
+                .setPositiveButton("Importar", (d, w) -> {
+                    String url = input.getText().toString().trim();
+                    if (!url.isEmpty()) {
+                        downloadImage(url);
+                    } else {
+                        Toast.makeText(this, "URL vazia", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void downloadImage(String urlStr) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(urlStr);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(8000);
+                conn.setReadTimeout(8000);
+                conn.connect();
+                try (InputStream is = conn.getInputStream()) {
+                    Bitmap bmp = BitmapFactory.decodeStream(is);
+                    if (bmp != null) {
+                        runOnUiThread(() -> pinShortcutWithIcon(bmp));
+                    } else {
+                        runOnUiThread(() -> Toast.makeText(this, "Falha ao decodificar imagem", Toast.LENGTH_SHORT).show());
+                    }
+                }
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "Erro ao baixar imagem: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+    private void handleImageUri(Uri uri) {
+        try (InputStream is = getContentResolver().openInputStream(uri)) {
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            if (bmp != null) {
+                pinShortcutWithIcon(bmp);
+            } else {
+                Toast.makeText(this, "Imagem inválida", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Erro ao abrir imagem: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void pinShortcutWithIcon(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ShortcutManager sm = getSystemService(ShortcutManager.class);
+            if (sm != null && sm.isRequestPinShortcutSupported()) {
+                Intent launchIntent = new Intent(this, LoginActivity.class);
+                launchIntent.setAction(Intent.ACTION_VIEW);
+
+                ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "appdetestes_custom_icon")
+                        .setShortLabel(getString(R.string.app_name))
+                        .setLongLabel(getString(R.string.app_name))
+                        .setIcon(Icon.createWithBitmap(bitmap))
+                        .setIntent(launchIntent)
+                        .build();
+                sm.requestPinShortcut(shortcut, null);
+                Toast.makeText(this, "Solicitado atalho com ícone personalizado", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Launcher não suporta atalhos fixados", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Android não suporta atalhos fixados nesta versão", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setIconVariant(boolean useAlt) {
+        PackageManager pm = getPackageManager();
+        ComponentName defaultAlias = new ComponentName(getPackageName(), "com.example.appdetestes.LauncherDefault");
+        ComponentName altAlias = new ComponentName(getPackageName(), "com.example.appdetestes.LauncherAlt");
+
+        pm.setComponentEnabledSetting(
+                defaultAlias,
+                useAlt ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED : PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP
+        );
+        pm.setComponentEnabledSetting(
+                altAlias,
+                useAlt ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP
+        );
+
+        Toast.makeText(this, useAlt ? "Ícone alternativo ativado" : "Ícone padrão ativado", Toast.LENGTH_SHORT).show();
     }
 }

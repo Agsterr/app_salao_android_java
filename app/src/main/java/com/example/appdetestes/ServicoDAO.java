@@ -45,6 +45,21 @@ public class ServicoDAO {
         return servicos;
     }
 
+    public int atualizarServico(Servico servico) {
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.COLUMN_SERVICO_NOME, servico.getNome());
+        values.put(DatabaseHelper.COLUMN_SERVICO_TEMPO, servico.getTempo());
+        return db.update(DatabaseHelper.TABLE_SERVICOS, values,
+                DatabaseHelper.COLUMN_SERVICO_ID + " = ?",
+                new String[]{String.valueOf(servico.getId())});
+    }
+
+    public int apagarServico(long id) {
+        return db.delete(DatabaseHelper.TABLE_SERVICOS,
+                DatabaseHelper.COLUMN_SERVICO_ID + " = ?",
+                new String[]{String.valueOf(id)});
+    }
+
     private Servico cursorToServico(Cursor cursor) {
         Servico servico = new Servico();
         servico.setId(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_SERVICO_ID)));

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Título do compromisso" />
+
+    <EditText
+        android:id="@+id/editTextAgendaTitulo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ex: Corte de cabelo"
+        android:inputType="text" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Status" />
+
+    <Spinner
+        android:id="@+id/spinnerAgendaStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Novo: Hora do lembrete do dia anterior -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Hora do lembrete (dia anterior)" />
+
+    <TimePicker
+        android:id="@+id/timePickerPrevDayReminder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:timePickerMode="spinner" />
+
+    <CheckBox
+        android:id="@+id/checkBoxTemLocal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Tem local?" />
+
+    <LinearLayout
+        android:id="@+id/layoutEndereco"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/editTextAgendaEndereco"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Endereço (rua, número, bairro)"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/buttonAbrirMaps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Abrir Google Maps" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -8,6 +8,15 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.EditText;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.text.TextWatcher;
+import android.text.Editable;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -62,11 +71,55 @@ public class AddAgendamentoActivity extends AppCompatActivity {
         timePicker = findViewById(R.id.timePicker);
         timePicker.setIs24HourView(true);
         editTextValor = findViewById(R.id.editTextValor);
+        // Fecha o teclado ao pressionar "Done" no campo de valor
+        editTextValor.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editTextValor.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard();
+                v.clearFocus();
+            }
+            return false;
+        });
+
+        // Permite fechar o teclado ao tocar fora dos campos
+        View root = findViewById(android.R.id.content);
+        root.setOnTouchListener((v, ev) -> {
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                hideKeyboard();
+                v.requestFocus();
+            }
+            return false;
+        });
+
         buttonSalvarAgendamento = findViewById(R.id.buttonSalvarAgendamento);
 
         // Carrega dados
         carregarClientes();
         carregarServicos();
+
+        // Habilita/desabilita o botão conforme preenchimento e adiciona ouvintes
+        spinnerCliente.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                atualizarEstadoBotaoSalvar();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) { }
+        });
+        spinnerServico.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                atualizarEstadoBotaoSalvar();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) { }
+        });
+        editTextValor.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                atualizarEstadoBotaoSalvar();
+            }
+        });
+
+        // Estado inicial do botão
+        atualizarEstadoBotaoSalvar();
 
         // Determina o modo (criação ou edição) e configura a UI
         if (getIntent().hasExtra("agendamento_id")) {
@@ -84,58 +137,67 @@ public class AddAgendamentoActivity extends AppCompatActivity {
             setTitle("Novo Agendamento");
         }
 
+
         buttonSalvarAgendamento.setOnClickListener(v -> salvarAgendamento());
     }
 
     private void preencherDadosParaEdicao() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(agendamentoAtual.getDataHoraInicio());
-        timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY));
-        timePicker.setMinute(calendar.get(Calendar.MINUTE));
+        if (agendamentoAtual != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(agendamentoAtual.getDataHoraInicio());
+            timePicker.setHour(cal.get(Calendar.HOUR_OF_DAY));
+            timePicker.setMinute(cal.get(Calendar.MINUTE));
+            // Mantém o DatePicker sincronizado pela variável dataSelecionadaNoCalendario
 
-        for (int i = 0; i < listaClientes.size(); i++) {
-            if (listaClientes.get(i).getId() == agendamentoAtual.getClienteId()) {
-                spinnerCliente.setSelection(i);
-                break;
+            // Seleciona o cliente correspondente
+            for (int i = 0; i < listaClientes.size(); i++) {
+                if (listaClientes.get(i).getId() == agendamentoAtual.getClienteId()) {
+                    spinnerCliente.setSelection(i + 1);
+                    break;
+                }
             }
-        }
 
-        for (int i = 0; i < listaServicos.size(); i++) {
-            if (listaServicos.get(i).getId() == agendamentoAtual.getServicoId()) {
-                spinnerServico.setSelection(i);
-                break;
+            // Seleciona o serviço correspondente
+            for (int i = 0; i < listaServicos.size(); i++) {
+                if (listaServicos.get(i).getId() == agendamentoAtual.getServicoId()) {
+                    spinnerServico.setSelection(i + 1);
+                    break;
+                }
             }
-        }
 
-        // Preenche o valor, se disponível
-        editTextValor.setText(String.valueOf(agendamentoAtual.getValor()));
+            // Preenche o valor
+            editTextValor.setText(String.valueOf(agendamentoAtual.getValor()));
+        }
     }
 
-
-
-
     private void salvarAgendamento() {
-        if (spinnerCliente.getSelectedItem() == null || spinnerServico.getSelectedItem() == null) {
-            Toast.makeText(this, "Selecione um cliente e um serviço", Toast.LENGTH_SHORT).show();
+        // Bloqueia tentativa de salvar se formulário inválido
+        if (!isFormValid()) {
+            Toast.makeText(this, "Preencha todos os campos obrigatórios.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         // 1. Coletar dados da UI
-        long clienteId = listaClientes.get(spinnerCliente.getSelectedItemPosition()).getId();
-        long servicoId = listaServicos.get(spinnerServico.getSelectedItemPosition()).getId();
-        int tempoMin = listaServicos.get(spinnerServico.getSelectedItemPosition()).getTempo();
+        int posCliente = spinnerCliente.getSelectedItemPosition();
+        int posServico = spinnerServico.getSelectedItemPosition();
+        long clienteId = listaClientes.get(posCliente - 1).getId();
+        long servicoId = listaServicos.get(posServico - 1).getId();
+        int tempoMin = listaServicos.get(posServico - 1).getTempo();
         long dataHoraInicio = calcularDataHoraInicio();
 
         // Valor do serviço
         String valorStr = editTextValor.getText().toString().trim();
-        if (valorStr.isEmpty()) {
+        if (TextUtils.isEmpty(valorStr)) {
+            editTextValor.setError("Informe o valor");
             Toast.makeText(this, "Informe o valor do serviço", Toast.LENGTH_SHORT).show();
             return;
         }
         double valor;
         try {
             valor = Double.parseDouble(valorStr.replace(",", "."));
+            editTextValor.setError(null);
         } catch (NumberFormatException e) {
+            editTextValor.setError("Valor inválido");
             Toast.makeText(this, "Valor inválido", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -283,6 +345,17 @@ public class AddAgendamentoActivity extends AppCompatActivity {
         return calendar.getTimeInMillis();
     }
 
+    private void hideKeyboard() {
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+            view.clearFocus();
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -296,6 +369,7 @@ public class AddAgendamentoActivity extends AppCompatActivity {
         listaClientes = clienteDAO.getAllClientes();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.add("Selecione um cliente");
         for (Cliente cliente : listaClientes) {
             adapter.add(cliente.getNome());
         }
@@ -306,6 +380,7 @@ public class AddAgendamentoActivity extends AppCompatActivity {
         listaServicos = servicoDAO.getAllServicos();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.add("Selecione um serviço");
         for (Servico servico : listaServicos) {
             adapter.add(servico.getNome());
         }
@@ -318,5 +393,28 @@ public class AddAgendamentoActivity extends AppCompatActivity {
         servicoDAO.close();
         agendamentoDAO.close();
         super.onDestroy();
+    }
+
+    private boolean isFormValid() {
+        boolean clientesDisponiveis = listaClientes != null && !listaClientes.isEmpty();
+        boolean servicosDisponiveis = listaServicos != null && !listaServicos.isEmpty();
+        boolean clienteSelecionado = clientesDisponiveis && spinnerCliente.getSelectedItemPosition() > 0;
+        boolean servicoSelecionado = servicosDisponiveis && spinnerServico.getSelectedItemPosition() > 0;
+        String valorStr = editTextValor.getText() != null ? editTextValor.getText().toString().trim() : "";
+        boolean valorPreenchido = !TextUtils.isEmpty(valorStr);
+
+        if (!valorPreenchido) {
+            editTextValor.setError("Informe o valor");
+        } else {
+            editTextValor.setError(null);
+        }
+
+        return clienteSelecionado && servicoSelecionado && valorPreenchido;
+    }
+
+    private void atualizarEstadoBotaoSalvar() {
+        boolean valido = isFormValid();
+        buttonSalvarAgendamento.setEnabled(valido);
+        buttonSalvarAgendamento.setAlpha(valido ? 1f : 0.5f);
     }
 }

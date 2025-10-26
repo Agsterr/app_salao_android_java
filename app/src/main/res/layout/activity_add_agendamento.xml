@@ -5,6 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
+    android:focusableInTouchMode="true"
+    android:clickable="true"
     tools:context=".AddAgendamentoActivity">
 
     <TextView
@@ -39,7 +41,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="numberDecimal"
-        android:hint="Ex: 50,00" />
+        android:hint="Ex: 50,00"
+        android:imeOptions="actionDone" />
+
 
     <TextView
         android:layout_width="wrap_content"
@@ -51,7 +55,8 @@
         android:id="@+id/timePicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:timePickerMode="spinner" />
+        android:timePickerMode="spinner"
+        android:descendantFocusability="blocksDescendants" />
 
     <Button
         android:id="@+id/buttonSalvarAgendamento"

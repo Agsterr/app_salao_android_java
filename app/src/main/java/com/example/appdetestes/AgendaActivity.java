@@ -5,11 +5,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
 import android.widget.CalendarView;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -22,6 +29,13 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Arrays;
+import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class AgendaActivity extends AppCompatActivity {
 
@@ -32,6 +46,9 @@ public class AgendaActivity extends AppCompatActivity {
     private TextView textTotalSemana;
     private TextView textTotalMes;
     private TextView textTotalAno;
+    private TextView textTotalDia; // novo
+    private Spinner spinnerStatusFilter; // novo
+    private Button buttonSairAgenda;
 
     private AgendamentoDAO agendamentoDAO;
     private long dataSelecionada;
@@ -39,6 +56,8 @@ public class AgendaActivity extends AppCompatActivity {
     private AgendaExpandableListAdapter listAdapter;
     private List<String> listDataHeader;
     private HashMap<String, List<Agendamento>> listDataChild;
+
+    private String statusFiltro = "Todos"; // novo
 
     /**
      * Chamado quando a activity está sendo criada.
@@ -63,6 +82,24 @@ public class AgendaActivity extends AppCompatActivity {
         textTotalSemana = findViewById(R.id.textTotalSemana);
         textTotalMes = findViewById(R.id.textTotalMes);
         textTotalAno = findViewById(R.id.textTotalAno);
+        textTotalDia = findViewById(R.id.textTotalDia);
+        spinnerStatusFilter = findViewById(R.id.spinnerStatusFilter);
+        buttonSairAgenda = findViewById(R.id.buttonSairAgenda);
+
+        // Configura o Spinner de status
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
+                Arrays.asList("Todos", "Na fila", "Em andamento", "Finalizado"));
+        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerStatusFilter.setAdapter(statusAdapter);
+        spinnerStatusFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                statusFiltro = (String) parent.getItemAtPosition(position);
+                atualizarListaAgendamentos();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
 
         dataSelecionada = getTimestampInicioDoDia(System.currentTimeMillis());
 
@@ -81,100 +118,39 @@ public class AgendaActivity extends AppCompatActivity {
         });
 
         registerForContextMenu(expandableListViewAgendamentos);
+
+        buttonSairAgenda.setOnClickListener(v -> {
+            finish();
+        });
+        // Permite fechar o teclado ao tocar fora (segurança, caso o teclado esteja aberto)
+        View root = findViewById(android.R.id.content);
+        root.setOnTouchListener((v, ev) -> {
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                hideKeyboard();
+                v.requestFocus();
+            }
+            return false;
+        });
     }
 
-    /**
-     * Chamado quando o menu de contexto para a view é criado.
-     * @param menu O menu de contexto que está sendo construído.
-     * @param v A view para a qual o menu de contexto está sendo construído.
-     * @param menuInfo Informações extras sobre o item para o qual o menu de contexto deve ser mostrado.
-     */
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        ExpandableListView.ExpandableListContextMenuInfo info = (ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
-
-        if (ExpandableListView.getPackedPositionType(info.packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-            getMenuInflater().inflate(R.menu.menu_contexto_agendamento, menu);
-        }
-    }
-
-    /**
-     * Este hook é chamado sempre que um item em seu menu de contexto é selecionado.
-     * @param item O item do menu de contexto que foi selecionado.
-     * @return boolean Retorna false para permitir que o processamento normal do menu de contexto continue, true para consumi-lo aqui.
-     */
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        ExpandableListView.ExpandableListContextMenuInfo info = (ExpandableListView.ExpandableListContextMenuInfo) item.getMenuInfo();
-        int groupPosition = ExpandableListView.getPackedPositionGroup(info.packedPosition);
-        int childPosition = ExpandableListView.getPackedPositionChild(info.packedPosition);
-
-        Agendamento agendamentoSelecionado = (Agendamento) listAdapter.getChild(groupPosition, childPosition);
-        long agendamentoId = agendamentoSelecionado.getId();
-
-        if (item.getItemId() == R.id.menu_apagar) {
-            mostrarDialogoDeConfirmacao(agendamentoId);
-            return true;
-        } else if (item.getItemId() == R.id.menu_editar) {
-            Intent intent = new Intent(this, AddAgendamentoActivity.class);
-            intent.putExtra("agendamento_id", agendamentoId);
-            startActivity(intent);
-            return true;
-        }
-
-        return super.onContextItemSelected(item);
-    }
-
-    /**
-     * Exibe um diálogo de confirmação para apagar um agendamento.
-     * @param agendamentoId O ID do agendamento a ser apagado.
-     */
-    private void mostrarDialogoDeConfirmacao(long agendamentoId) {
-        new AlertDialog.Builder(this)
-                .setTitle("Confirmar Exclusão")
-                .setMessage("Tem certeza de que deseja apagar este agendamento?")
-                .setPositiveButton("Sim", (dialog, which) -> {
-                    agendamentoDAO.apagarAgendamento(agendamentoId);
-                    Toast.makeText(AgendaActivity.this, "Agendamento apagado!", Toast.LENGTH_SHORT).show();
-                    atualizarListaAgendamentos();
-                })
-                .setNegativeButton("Não", null)
-                .show();
-    }
-
-    /**
-     * Chamado quando a activity irá começar a interagir com o usuário.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        atualizarListaAgendamentos();
-        atualizarTotais();
-    }
-
-    /**
-     * Este hook é chamado sempre que um item no seu menu de opções é selecionado.
-     * @param item O item de menu que foi selecionado.
-     * @return boolean Retorna false para permitir que o processamento normal do menu continue, true para consumi-lo aqui.
-     */
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish(); // Alterado de onBackPressed() para finish()
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Atualiza a lista de agendamentos para o dia selecionado.
-     */
     private void atualizarListaAgendamentos() {
         List<Agendamento> agendamentosDoDia = agendamentoDAO.getAgendamentosPorDia(dataSelecionada);
 
+        // Aplica filtro de status, ignorando cancelados quando um status específico é escolhido
+        List<Agendamento> agendamentosFiltrados = new ArrayList<>();
+        for (Agendamento a : agendamentosDoDia) {
+            String status = a.getStatus();
+            if ("Todos".equals(statusFiltro)) {
+                agendamentosFiltrados.add(a);
+            } else {
+                if (!"Cancelado".equals(status) && status.equals(statusFiltro)) {
+                    agendamentosFiltrados.add(a);
+                }
+            }
+        }
+
         listDataChild = new LinkedHashMap<>();
-        for (Agendamento agendamento : agendamentosDoDia) {
+        for (Agendamento agendamento : agendamentosFiltrados) {
             String nomeCliente = agendamento.getNomeCliente();
             if (!listDataChild.containsKey(nomeCliente)) {
                 listDataChild.put(nomeCliente, new ArrayList<>());
@@ -188,19 +164,22 @@ public class AgendaActivity extends AppCompatActivity {
         expandableListViewAgendamentos.setAdapter(listAdapter);
 
         // Controla a visibilidade da dica e da lista baseado no estado dos agendamentos
-        if (agendamentosDoDia.isEmpty()) {
-            // Se a lista está VAZIA, mostra a dica "Nenhum agendamento..." e esconde a lista
+        if (agendamentosFiltrados.isEmpty()) {
             expandableListViewAgendamentos.setVisibility(View.GONE);
             textViewDica.setVisibility(View.VISIBLE);
             textViewDica.setText("Nenhum agendamento para este dia.\nToque no '+' para adicionar.");
         } else {
-            // Se a lista NÃO está vazia, mostra a lista e esconde a dica
             expandableListViewAgendamentos.setVisibility(View.VISIBLE);
             textViewDica.setVisibility(View.GONE);
         }
     }
 
     private void atualizarTotais() {
+        // Dia
+        long inicioDia = getTimestampInicioDoDia(dataSelecionada);
+        long fimDia = inicioDia + (24L * 60 * 60 * 1000) - 1;
+        double totalDia = agendamentoDAO.getTotalValorPeriodo(inicioDia, fimDia);
+
         // Semana (segunda a domingo)
         Calendar calSemana = Calendar.getInstance();
         calSemana.setTimeInMillis(dataSelecionada);
@@ -230,9 +209,10 @@ public class AgendaActivity extends AppCompatActivity {
         long fimAno = inicioProximoAno - 1;
         double totalAno = agendamentoDAO.getTotalValorPeriodo(inicioAno, fimAno);
 
-        textTotalSemana.setText("Total da Semana: R$ " + String.format("%.2f", totalSemana));
-        textTotalMes.setText("Total do Mês: R$ " + String.format("%.2f", totalMes));
-        textTotalAno.setText("Total do Ano: R$ " + String.format("%.2f", totalAno));
+        setTotalText(textTotalDia, "Total do Dia:", totalDia);
+        setTotalText(textTotalSemana, "Total da Semana:", totalSemana);
+        setTotalText(textTotalMes, "Total do Mês:", totalMes);
+        setTotalText(textTotalAno, "Total do Ano:", totalAno);
     }
 
     /**
@@ -257,5 +237,116 @@ public class AgendaActivity extends AppCompatActivity {
     protected void onDestroy() {
         agendamentoDAO.close();
         super.onDestroy();
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        ExpandableListView.ExpandableListContextMenuInfo info = (ExpandableListView.ExpandableListContextMenuInfo) menuInfo;
+        if (ExpandableListView.getPackedPositionType(info.packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+            getMenuInflater().inflate(R.menu.menu_contexto_agendamento, menu);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        ExpandableListView.ExpandableListContextMenuInfo info = (ExpandableListView.ExpandableListContextMenuInfo) item.getMenuInfo();
+        int groupPosition = ExpandableListView.getPackedPositionGroup(info.packedPosition);
+        int childPosition = ExpandableListView.getPackedPositionChild(info.packedPosition);
+    
+        Agendamento agendamentoSelecionado = (Agendamento) listAdapter.getChild(groupPosition, childPosition);
+        long agendamentoId = agendamentoSelecionado.getId();
+    
+        if (item.getItemId() == R.id.menu_apagar) {
+            mostrarDialogoDeConfirmacao(agendamentoId);
+            return true;
+        } else if (item.getItemId() == R.id.menu_editar) {
+            Intent intent = new Intent(this, AddAgendamentoActivity.class);
+            intent.putExtra("agendamento_id", agendamentoId);
+            startActivity(intent);
+            return true;
+        } else if (item.getItemId() == R.id.menu_reagendar) {
+            Intent intent = new Intent(this, AddAgendamentoActivity.class);
+            intent.putExtra("agendamento_id", agendamentoId);
+            startActivity(intent);
+            return true;
+        } else if (item.getItemId() == R.id.menu_cancelar) {
+            agendamentoSelecionado.setCancelado(1);
+            agendamentoSelecionado.setFinalizado(0);
+            int rows = agendamentoDAO.atualizarAgendamentoIgnorandoConflito(agendamentoSelecionado);
+            if (rows > 0) {
+                Toast.makeText(this, "Agendamento cancelado!", Toast.LENGTH_SHORT).show();
+                atualizarListaAgendamentos();
+                atualizarTotais();
+            } else {
+                Toast.makeText(this, "Falha ao cancelar agendamento", Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        } else if (item.getItemId() == R.id.menu_finalizar) {
+            agendamentoSelecionado.setFinalizado(1);
+            agendamentoSelecionado.setCancelado(0);
+            int rows = agendamentoDAO.atualizarAgendamentoIgnorandoConflito(agendamentoSelecionado);
+            if (rows > 0) {
+                Toast.makeText(this, "Agendamento finalizado!", Toast.LENGTH_SHORT).show();
+                atualizarListaAgendamentos();
+                atualizarTotais();
+            } else {
+                Toast.makeText(this, "Falha ao finalizar agendamento", Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    private void mostrarDialogoDeConfirmacao(long agendamentoId) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar Exclusão")
+                .setMessage("Tem certeza de que deseja apagar este agendamento?")
+                .setPositiveButton("Sim", (dialog, which) -> {
+                    agendamentoDAO.apagarAgendamento(agendamentoId);
+                    Toast.makeText(AgendaActivity.this, "Agendamento apagado!", Toast.LENGTH_SHORT).show();
+                    atualizarListaAgendamentos();
+                    atualizarTotais();
+                })
+                .setNegativeButton("Não", null)
+                .show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        atualizarListaAgendamentos();
+        atualizarTotais();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setTotalText(TextView tv, String label, double value) {
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt","BR"));
+        String formatted = nf.format(value);
+        String full = label + " " + formatted;
+        SpannableString ss = new SpannableString(full);
+        int start = full.lastIndexOf(formatted);
+        if (start >= 0) {
+            ss.setSpan(new ForegroundColorSpan(Color.RED), start, start + formatted.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        tv.setText(ss);
+    }
+    private void hideKeyboard() {
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+            view.clearFocus();
+        }
     }
 }

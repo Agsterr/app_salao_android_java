@@ -38,4 +38,10 @@ public class Servico {
     public void setTempo(int tempo) {
         this.tempo = tempo;
     }
+
+    @Override
+    public String toString() {
+        String nomeStr = nome != null ? nome : "";
+        return tempo > 0 ? (nomeStr + " - " + tempo + " min") : nomeStr;
+    }
 }

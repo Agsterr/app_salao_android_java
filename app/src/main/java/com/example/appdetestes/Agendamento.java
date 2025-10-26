@@ -13,6 +13,11 @@ public class Agendamento {
     private String nomeServico;
     private int tempoServico;
 
+    // Novo: controle de cancelamento
+    private int cancelado; // 0 = não cancelado, 1 = cancelado
+    // Novo: controle de finalização
+    private int finalizado; // 0 = não finalizado, 1 = finalizado
+
     public Agendamento() {
     }
 
@@ -76,4 +81,24 @@ public class Agendamento {
 
     public double getValor() { return valor; }
     public void setValor(double valor) { this.valor = valor; }
+
+    public int getCancelado() { return cancelado; }
+    public void setCancelado(int cancelado) { this.cancelado = cancelado; }
+    public boolean isCancelado() { return cancelado == 1; }
+
+    public int getFinalizado() { return finalizado; }
+    public void setFinalizado(int finalizado) { this.finalizado = finalizado; }
+    public boolean isFinalizado() { return finalizado == 1; }
+
+    // Status calculado dinamicamente
+    public String getStatus() {
+        if (isCancelado()) return "Cancelado";
+        if (isFinalizado()) return "Finalizado";
+        long agora = System.currentTimeMillis();
+        long inicio = dataHoraInicio;
+        long fim = inicio + (tempoServico * 60000L);
+        if (agora < inicio) return "Na fila";
+        if (agora >= inicio && agora <= fim) return "Em andamento";
+        return "Finalizado"; // passou do fim e não está cancelado
+    }
 }

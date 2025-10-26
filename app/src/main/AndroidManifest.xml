@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    package="com.example.appdetestes">
 
-    <uses-permission android:name="com.android.vending.BILLING" />
-
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -15,25 +13,77 @@
         android:theme="@style/Theme.AppDeTestes">
         <activity
             android:name=".LoginActivity"
-            android:exported="true">
+            android:exported="true" />
+
+        <activity-alias
+            android:name=".LauncherDefault"
+            android:targetActivity=".LoginActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".LauncherAlt"
+            android:targetActivity=".LoginActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_alt">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
         <activity
             android:name=".AgendaActivity"
-            android:parentActivityName=".ClienteActivity" />
+            android:parentActivityName=".ClienteActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".AddAgendamentoActivity"
-            android:parentActivityName=".AgendaActivity" />
+            android:parentActivityName=".AgendaActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ServicoActivity"
             android:parentActivityName=".ClienteActivity" />
         <activity android:name=".SubscriptionActivity" />
         <activity android:name=".ClienteActivity" />
         <activity android:name=".MainActivity" />
-    </application>
+        <activity android:name=".ChangePasswordActivity" />
 
+        <activity
+            android:name=".ProdutoActivity"
+            android:parentActivityName=".ClienteActivity" />
+        <activity
+            android:name=".RegistrarVendaActivity"
+            android:parentActivityName=".ProdutoActivity" />
+        <activity
+            android:name=".RegistrarVendaMultiplaActivity"
+            android:parentActivityName=".ProdutoActivity" />
+        <activity
+            android:name=".RecebimentosActivity"
+            android:parentActivityName=".ProdutoActivity" />
+        <activity
+            android:name=".VendasActivity"
+            android:parentActivityName=".ProdutoActivity" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <receiver
+            android:name=".AgendaReminderReceiver"
+            android:exported="false" />
+
+    </application>
 </manifest>

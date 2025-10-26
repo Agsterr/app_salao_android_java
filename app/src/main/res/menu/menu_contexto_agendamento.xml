@@ -4,6 +4,15 @@
         android:id="@+id/menu_editar"
         android:title="Editar" />
     <item
+        android:id="@+id/menu_reagendar"
+        android:title="Reagendar" />
+    <item
+        android:id="@+id/menu_cancelar"
+        android:title="Cancelar" />
+    <item
+        android:id="@+id/menu_finalizar"
+        android:title="Finalizar" />
+    <item
         android:id="@+id/menu_apagar"
         android:title="Apagar" />
 </menu>

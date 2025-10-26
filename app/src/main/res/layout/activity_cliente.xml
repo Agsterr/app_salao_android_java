@@ -5,48 +5,220 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="@dimen/container_padding"
     tools:context=".ClienteActivity">
 
     <EditText
         android:id="@+id/editTextNome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nome" />
+        android:hint="Nome"
+        android:visibility="gone" />
 
 
+    <!-- Botões principais em duas linhas para evitar quebra de texto -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/buttonSalvar"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Salvar" />
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/buttonGerenciarServicos"
-            android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/buttonSalvar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingVertical="8dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="Clientes" />
+
+            <Button
+                android:id="@+id/buttonGerenciarServicos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/header_button_spacing"
+                android:paddingVertical="8dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="Serviços" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Serviços" />
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/header_button_spacing">
 
-        <Button
-            android:id="@+id/buttonVerAgenda"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Ver Agenda" />
+            <Button
+                android:id="@+id/buttonGerenciarProdutos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingVertical="8dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="Produtos" />
 
+            <Button
+                android:id="@+id/buttonVerAgenda"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/header_button_spacing"
+                android:paddingVertical="8dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="Ver Agenda" />
+        </LinearLayout>
     </LinearLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/layoutAgendaHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_medium">
+
+        <Button
+            android:id="@+id/textViewAgendaLegenda"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Agenda pessoal"
+            android:textStyle="bold"
+            android:textSize="@dimen/text_size_medium" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutAgendaContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/buttonToggleCalendar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fechar calendário" />
+
+        <CalendarView
+            android:id="@+id/calendarAgendaView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/buttonAdicionarAgendaInline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adicionar Compromisso" />
+
+        <!-- Filtro de status da agenda -->
+        <Spinner
+            android:id="@+id/spinnerAgendaFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small" />
+
+        <ListView
+            android:id="@+id/listViewAgenda"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="@dimen/spacing_small" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutClientesHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_medium"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/textViewListaClientesLegenda"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Lista de clientes"
+            android:textStyle="bold"
+            android:textSize="@dimen/text_size_medium" />
+
+        <Button
+            android:id="@+id/buttonAdicionarClienteInline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adicionar Cliente" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/editTextBuscarClientes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:hint="Buscar clientes"
+        android:inputType="text"
+        android:visibility="gone" />
 
     <ListView
         android:id="@+id/listViewClientes"
         android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/layoutServicosHeader"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" />
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_medium"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/textViewListaServicosLegenda"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Lista de serviços"
+            android:textStyle="bold"
+            android:textSize="@dimen/text_size_medium" />
+
+        <Button
+            android:id="@+id/buttonAdicionarServicoInline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adicionar Serviço" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/editTextBuscarServicos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:hint="Buscar serviços"
+        android:inputType="text"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/listViewServicos"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:visibility="gone" />
+
 
 </LinearLayout>

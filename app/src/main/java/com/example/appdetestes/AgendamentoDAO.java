@@ -69,7 +69,8 @@ public class AgendamentoDAO {
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_SERVICO_ID, agendamento.getServicoId());
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO, agendamento.getDataHoraInicio());
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_VALOR, agendamento.getValor());
-
+        values.put(DatabaseHelper.COLUMN_AGENDAMENTO_CANCELADO, agendamento.getCancelado());
+        values.put(DatabaseHelper.COLUMN_AGENDAMENTO_FINALIZADO, agendamento.getFinalizado());
         long resultado = db.insert(DatabaseHelper.TABLE_AGENDAMENTOS, null, values);
 
         if (resultado > 0) {
@@ -94,6 +95,8 @@ public class AgendamentoDAO {
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_SERVICO_ID, agendamento.getServicoId());
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO, agendamento.getDataHoraInicio());
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_VALOR, agendamento.getValor());
+        values.put(DatabaseHelper.COLUMN_AGENDAMENTO_CANCELADO, agendamento.getCancelado());
+        values.put(DatabaseHelper.COLUMN_AGENDAMENTO_FINALIZADO, agendamento.getFinalizado());
         long resultado = db.insert(DatabaseHelper.TABLE_AGENDAMENTOS, null, values);
         if (resultado > 0) {
             Log.d("CONFLITO_DAO", "✅ AGENDAMENTO INSERIDO (forçado) ID: " + resultado);
@@ -126,7 +129,8 @@ public class AgendamentoDAO {
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_SERVICO_ID, agendamento.getServicoId());
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO, agendamento.getDataHoraInicio());
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_VALOR, agendamento.getValor());
-
+        values.put(DatabaseHelper.COLUMN_AGENDAMENTO_CANCELADO, agendamento.getCancelado());
+        values.put(DatabaseHelper.COLUMN_AGENDAMENTO_FINALIZADO, agendamento.getFinalizado());
         return db.update(DatabaseHelper.TABLE_AGENDAMENTOS, values, DatabaseHelper.COLUMN_AGENDAMENTO_ID + " = ?", new String[]{String.valueOf(agendamento.getId())});
     }
 
@@ -142,6 +146,8 @@ public class AgendamentoDAO {
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_SERVICO_ID, agendamento.getServicoId());
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO, agendamento.getDataHoraInicio());
         values.put(DatabaseHelper.COLUMN_AGENDAMENTO_VALOR, agendamento.getValor());
+        values.put(DatabaseHelper.COLUMN_AGENDAMENTO_CANCELADO, agendamento.getCancelado());
+        values.put(DatabaseHelper.COLUMN_AGENDAMENTO_FINALIZADO, agendamento.getFinalizado());
         return db.update(DatabaseHelper.TABLE_AGENDAMENTOS, values, DatabaseHelper.COLUMN_AGENDAMENTO_ID + " = ?", new String[]{String.valueOf(agendamento.getId())});
     }
 
@@ -375,6 +381,14 @@ public class AgendamentoDAO {
             agendamento.setValor(cursor.getDouble(idxValor));
         }
 
+        int idxCancelado = cursor.getColumnIndex(DatabaseHelper.COLUMN_AGENDAMENTO_CANCELADO);
+        if (idxCancelado != -1) {
+            agendamento.setCancelado(cursor.getInt(idxCancelado));
+        }
+        int idxFinalizado = cursor.getColumnIndex(DatabaseHelper.COLUMN_AGENDAMENTO_FINALIZADO);
+        if (idxFinalizado != -1) {
+            agendamento.setFinalizado(cursor.getInt(idxFinalizado));
+        }
         return agendamento;
     }
 
@@ -396,8 +410,8 @@ public class AgendamentoDAO {
     public double getTotalValorPeriodo(long inicio, long fim) {
         double total = 0.0;
         Cursor cursor = db.rawQuery(
-                "SELECT SUM(COALESCE(" + DatabaseHelper.COLUMN_AGENDAMENTO_VALOR + ", 0)) FROM " + DatabaseHelper.TABLE_AGENDAMENTOS +
-                        " WHERE " + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + " >= ? AND " + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + " <= ?",
+                "SELECT SUM(" + DatabaseHelper.COLUMN_AGENDAMENTO_VALOR + ") FROM " + DatabaseHelper.TABLE_AGENDAMENTOS +
+                        " WHERE " + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + " >= ? AND " + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + " <= ? AND " + DatabaseHelper.COLUMN_AGENDAMENTO_CANCELADO + " = 0 AND " + DatabaseHelper.COLUMN_AGENDAMENTO_VALOR + " > 0",
                 new String[]{String.valueOf(inicio), String.valueOf(fim)}
         );
         if (cursor != null) {
