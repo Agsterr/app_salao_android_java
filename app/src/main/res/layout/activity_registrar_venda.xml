@@ -46,11 +46,20 @@
         </LinearLayout>
 
         <EditText
+            android:id="@+id/editTextQuantidade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:hint="Quantidade"
+            android:inputType="number"
+            android:text="1" />
+
+        <EditText
             android:id="@+id/editTextValorVenda"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"
-            android:hint="Valor da venda"
+            android:hint="Valor unitário"
             android:inputType="numberDecimal" />
 
         <TextView

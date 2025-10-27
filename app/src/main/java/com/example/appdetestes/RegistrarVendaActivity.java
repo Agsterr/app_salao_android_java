@@ -28,6 +28,7 @@ public class RegistrarVendaActivity extends AppCompatActivity {
 
     private TextView textViewProduto;
     private EditText editTextValorVenda;
+    private EditText editTextQuantidade;
     private Spinner spinnerFormaPagamento; // Dinheiro, Crédito
     private RadioGroup radioGroupTipoPagamento; // À vista, A prazo
     private RadioButton radioAvista;
@@ -43,6 +44,7 @@ public class RegistrarVendaActivity extends AppCompatActivity {
     private ProdutoDAO produtoDAO;
     private VendaDAO vendaDAO;
     private ClienteDAO clienteDAO;
+    private VendaItemDAO vendaItemDAO;
 
     private Long dataPrimeiraParcelaMillis = null;
 
@@ -62,9 +64,12 @@ public class RegistrarVendaActivity extends AppCompatActivity {
         vendaDAO.open();
         clienteDAO = new ClienteDAO(this);
         clienteDAO.open();
+        vendaItemDAO = new VendaItemDAO(this);
+        vendaItemDAO.open();
 
         textViewProduto = findViewById(R.id.textViewProduto);
         editTextValorVenda = findViewById(R.id.editTextValorVenda);
+        editTextQuantidade = findViewById(R.id.editTextQuantidade);
         spinnerFormaPagamento = findViewById(R.id.spinnerFormaPagamento);
         radioGroupTipoPagamento = findViewById(R.id.radioGroupTipoPagamento);
         radioAvista = findViewById(R.id.radioAvista);
@@ -110,6 +115,7 @@ public class RegistrarVendaActivity extends AppCompatActivity {
         NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         textViewProduto.setText("Produto: " + produto.getNome() + " (" + nf.format(produto.getValorPadrao()) + ")");
         editTextValorVenda.setText(String.valueOf(produto.getValorPadrao()));
+        if (editTextQuantidade != null) editTextQuantidade.setText("1");
 
         radioGroupTipoPagamento.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.radioAvista) {
@@ -131,6 +137,7 @@ public class RegistrarVendaActivity extends AppCompatActivity {
         produtoDAO.close();
         vendaDAO.close();
         if (clienteDAO != null) clienteDAO.close();
+        if (vendaItemDAO != null) vendaItemDAO.close();
         super.onDestroy();
     }
 
@@ -161,6 +168,7 @@ public class RegistrarVendaActivity extends AppCompatActivity {
         editTextValorVenda.setError(null);
         editTextNumeroParcelas.setError(null);
         editTextDataPrimeiraParcela.setError(null);
+        if (editTextQuantidade != null) editTextQuantidade.setError(null);
 
         // Cliente obrigatório
         if (spinnerCliente.getAdapter() == null || spinnerCliente.getAdapter().getCount() <= 1) {
@@ -185,34 +193,65 @@ public class RegistrarVendaActivity extends AppCompatActivity {
         }
         String formaSelecionada = spinnerFormaPagamento.getSelectedItem().toString();
 
-        // Valor obrigatório e válido
+        // Quantidade obrigatória e válida
+        String qtdStr = editTextQuantidade.getText().toString().trim();
+        if (qtdStr.isEmpty()) {
+            editTextQuantidade.setError("Informe a quantidade");
+            editTextQuantidade.requestFocus();
+            return;
+        }
+        int quantidade;
+        try {
+            quantidade = Integer.parseInt(qtdStr);
+        } catch (NumberFormatException e) {
+            editTextQuantidade.setError("Quantidade inválida");
+            editTextQuantidade.requestFocus();
+            return;
+        }
+        if (quantidade <= 0) {
+            editTextQuantidade.setError("Deve ser maior que zero");
+            editTextQuantidade.requestFocus();
+            return;
+        }
+
+        // Valor unitário obrigatório e válido
         String valorStr = editTextValorVenda.getText().toString().trim();
         if (valorStr.isEmpty()) {
-            editTextValorVenda.setError("Informe o valor da venda");
+            editTextValorVenda.setError("Informe o valor unitário");
             editTextValorVenda.requestFocus();
             return;
         }
-        double valor;
+        double valorUnitario;
         try {
-            valor = Double.parseDouble(valorStr);
+            valorUnitario = Double.parseDouble(valorStr);
         } catch (NumberFormatException e) {
             editTextValorVenda.setError("Valor inválido");
             editTextValorVenda.requestFocus();
             return;
         }
-        if (valor <= 0) {
+        if (valorUnitario <= 0) {
             editTextValorVenda.setError("O valor deve ser maior que zero");
             editTextValorVenda.requestFocus();
             return;
         }
+
+        double total = quantidade * valorUnitario;
 
         int checkedId = radioGroupTipoPagamento.getCheckedRadioButtonId();
         if (checkedId == R.id.radioAvista) {
             // Observação inclui forma de pagamento
             String observacao = "Forma: " + formaSelecionada;
             long dataVenda = System.currentTimeMillis();
-            long vendaId = vendaDAO.registrarVendaAVista(produtoId, valor, dataVenda, clienteSelecionado.getId(), observacao);
+            long vendaId = vendaDAO.registrarVendaAVista(produtoId, total, dataVenda, clienteSelecionado.getId(), observacao);
             if (vendaId > 0) {
+                // Registrar item único com quantidade e valor unitário
+                VendaItem item = new VendaItem();
+                item.setVendaId(vendaId);
+                item.setProdutoId(produtoId);
+                item.setQuantidade(quantidade);
+                item.setValorUnitario(valorUnitario);
+                vendaItemDAO.insert(item);
+
                 Toast.makeText(this, "Venda à vista registrada", Toast.LENGTH_SHORT).show();
                 finish();
             } else {
@@ -247,8 +286,16 @@ public class RegistrarVendaActivity extends AppCompatActivity {
 
             String observacao = "Forma: " + formaSelecionada;
             long dataVenda = System.currentTimeMillis();
-            long vendaId = vendaDAO.registrarVendaAPrazo(produtoId, valor, dataVenda, numeroParcelas, dataPrimeiraParcelaMillis, clienteSelecionado.getId(), observacao);
+            long vendaId = vendaDAO.registrarVendaAPrazo(produtoId, total, dataVenda, numeroParcelas, dataPrimeiraParcelaMillis, clienteSelecionado.getId(), observacao);
             if (vendaId > 0) {
+                // Registrar item único com quantidade e valor unitário
+                VendaItem item = new VendaItem();
+                item.setVendaId(vendaId);
+                item.setProdutoId(produtoId);
+                item.setQuantidade(quantidade);
+                item.setValorUnitario(valorUnitario);
+                vendaItemDAO.insert(item);
+
                 Toast.makeText(this, "Venda a prazo registrada", Toast.LENGTH_SHORT).show();
                 finish();
             } else {

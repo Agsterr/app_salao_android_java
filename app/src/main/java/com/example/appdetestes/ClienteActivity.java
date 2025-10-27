@@ -77,11 +77,20 @@ public class ClienteActivity extends AppCompatActivity {
     private ServicoDAO servicoDAO;
     private int contextMenuSourceViewId = -1;
     private Button buttonGerenciarProdutos;
+    private Button buttonBackup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cliente);
+        // Solicitar permissão de notificações no Android 13+
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                androidx.core.app.ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1001);
+            }
+        }
 
         clienteDAO = new ClienteDAO(this);
         clienteDAO.open();
@@ -102,6 +111,7 @@ public class ClienteActivity extends AppCompatActivity {
         buttonAdicionarClienteInline = findViewById(R.id.buttonAdicionarClienteInline);
         layoutClientesHeader = findViewById(R.id.layoutClientesHeader);
         buttonGerenciarProdutos = findViewById(R.id.buttonGerenciarProdutos);
+        buttonBackup = findViewById(R.id.buttonBackup);
         // Agenda Pessoal UI
         layoutAgendaHeader = findViewById(R.id.layoutAgendaHeader);
         buttonAgendaToggle = findViewById(R.id.textViewAgendaLegenda);
@@ -257,6 +267,15 @@ public class ClienteActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (layoutAgendaContent != null) layoutAgendaContent.setVisibility(View.GONE);
                 Intent intent = new Intent(ClienteActivity.this, AgendaActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        buttonBackup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (layoutAgendaContent != null) layoutAgendaContent.setVisibility(View.GONE);
+                Intent intent = new Intent(ClienteActivity.this, BackupActivity.class);
                 startActivity(intent);
             }
         });
@@ -938,10 +957,24 @@ private void scheduleAlarm(AgendaEntry entry, long triggerAtMillis, String type,
     int baseCode = (int) (entry.getTimestamp() % Integer.MAX_VALUE);
     int requestCode = baseCode + typeCode;
     android.app.PendingIntent pi = android.app.PendingIntent.getBroadcast(this, requestCode, intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-        alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, triggerAtMillis, pi);
-    } else {
-        alarmManager.setExact(android.app.AlarmManager.RTC_WAKEUP, triggerAtMillis, pi);
+
+    try {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, triggerAtMillis, pi);
+        } else {
+            alarmManager.setExact(android.app.AlarmManager.RTC_WAKEUP, triggerAtMillis, pi);
+        }
+    } catch (SecurityException se) {
+        // Sem permissão de alarme exato: usa agendamento aproximado e sugere habilitar.
+        alarmManager.set(android.app.AlarmManager.RTC_WAKEUP, triggerAtMillis, pi);
+        if (android.os.Build.VERSION.SDK_INT >= 31) {
+            try {
+                android.content.Intent permIntent = new android.content.Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                permIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(permIntent);
+                android.widget.Toast.makeText(this, "Habilite 'Alarmes exatos' para lembretes precisos.", android.widget.Toast.LENGTH_LONG).show();
+            } catch (Exception ignored) {}
+        }
     }
 }
 

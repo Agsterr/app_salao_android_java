@@ -193,9 +193,16 @@ public class RecebimentosActivity extends AppCompatActivity {
                 // Ordenar por data prevista crescente
                 java.util.Collections.sort(lr, (a, b) -> Long.compare(a.getDataPrevista(), b.getDataPrevista()));
                 for (Recebimento r : lr) {
-                    String linha = "Parcela " + r.getNumeroParcela() + " - " + nf.format(r.getValor()) +
+                    String base = "Parcela " + r.getNumeroParcela() + " - " + nf.format(r.getValor()) +
                             " - Prevista: " + sdf.format(r.getDataPrevista());
-                    recebimentosAdapter.add(linha);
+                    String statusStr = (r.getStatus() == RecebimentoDAO.STATUS_PAGO) ? "Pago" : "Pendente";
+                    String full = base + " • Status: " + statusStr;
+                    SpannableStringBuilder sb = new SpannableStringBuilder(full);
+                    int start = full.lastIndexOf(statusStr);
+                    int end = start + statusStr.length();
+                    int color = (r.getStatus() == RecebimentoDAO.STATUS_PAGO) ? Color.parseColor("#4CAF50") : Color.parseColor("#E53935");
+                    sb.setSpan(new ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    recebimentosAdapter.add(sb);
                     linhasRenderizadas.add(r);
                 }
                 recebimentosAdapter.add(" ");
