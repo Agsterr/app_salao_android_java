@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'com.example.appdetestes'
+    namespace 'com.focodevsistemas.gerenciamento'
     compileSdk 36
 
     buildFeatures {
@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.appdetestes"
+        applicationId "com.focodevsistemas.gerenciamento"
         minSdk 28
         targetSdk 36
         versionCode 1
@@ -27,7 +27,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Apenas o diretório de imagens de produtos -->
     <external-files-path name="images" path="Pictures/produtos/" />
+    <!-- Cache interno -->
     <cache-path name="cache" path="." />
+    <!-- Cache externo -->
     <external-cache-path name="external_cache" path="." />
-    <external-files-path name="external_files" path="." />
+    <!-- Arquivos internos do app -->
     <files-path name="files" path="." />
-    <external-path name="external" path="." />
+    <!-- REMOVIDO: external-path muito permissivo - não é necessário -->
 </paths>
