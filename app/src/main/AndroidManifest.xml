@@ -43,23 +43,39 @@
         </activity-alias>
         <activity
             android:name=".AgendaActivity"
-            android:parentActivityName=".ClienteActivity"
+            android:parentActivityName=".MenuActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
+            android:name=".AgendaCalendarioActivity"
+            android:parentActivityName=".AgendaActivity"
+            android:label="Agendar" />
+        <activity
+            android:name=".AgendaTotaisActivity"
+            android:parentActivityName=".AgendaActivity"
+            android:label="Totais e Lucros" />
+        <activity
+            android:name=".AgendaListaActivity"
+            android:parentActivityName=".AgendaActivity"
+            android:label="Agendamentos" />
         <activity
             android:name=".AddAgendamentoActivity"
             android:parentActivityName=".AgendaActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".ServicoActivity"
-            android:parentActivityName=".ClienteActivity" />
+            android:parentActivityName=".MenuActivity" />
         <activity android:name=".SubscriptionActivity" />
-        <activity android:name=".ClienteActivity" />
+        <activity android:name=".MenuActivity" />
+        <activity
+            android:name=".ClienteActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Clientes" />
         <activity android:name=".MainActivity" />
         <activity android:name=".ChangePasswordActivity" />
 
         <activity
             android:name=".ProdutoActivity"
-            android:parentActivityName=".ClienteActivity" />
+            android:parentActivityName=".MenuActivity" />
         <activity
             android:name=".RegistrarVendaActivity"
             android:parentActivityName=".ProdutoActivity" />
@@ -95,5 +111,13 @@
             android:name=".UpdatesActivity"
             android:exported="false"
             android:label="Atualizações" />
+        <activity
+            android:name=".AgendaPessoalActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Agenda Pessoal" />
+        <activity
+            android:name=".ServicoListActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Serviços" />
 </application>
 </manifest>

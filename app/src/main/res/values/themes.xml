@@ -6,4 +6,12 @@
     </style>
 
     <style name="Theme.AppDeTestes" parent="Base.Theme.AppDeTestes" />
+
+    <style name="TextAppearance_App_AgendaCalendarDate" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textColor">@color/calendar_service_color</item>
+    </style>
+
+    <style name="TextAppearance_App_AgendaCalendarWeekDay" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textColor">@color/calendar_service_color</item>
+    </style>
 </resources>

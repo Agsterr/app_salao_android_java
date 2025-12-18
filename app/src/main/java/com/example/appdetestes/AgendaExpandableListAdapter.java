@@ -50,15 +50,29 @@ public class AgendaExpandableListAdapter extends BaseExpandableListAdapter {
         TextView textViewServico = convertView.findViewById(R.id.textViewServico);
         TextView textViewStatus = convertView.findViewById(R.id.textViewStatus);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
         Date horaInicio = new Date(agendamento.getDataHoraInicio());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(horaInicio);
         calendar.add(Calendar.MINUTE, agendamento.getTempoServico());
         Date horaFim = calendar.getTime();
 
-        String horario = sdf.format(horaInicio) + " - " + sdf.format(horaFim);
-        textViewHorario.setText(horario);
+        // Verifica se o grupo já contém a data (formato "📅 DD/MM/YYYY • Cliente")
+        String headerTitle = (String) getGroup(groupPosition);
+        boolean grupoTemData = headerTitle != null && headerTitle.startsWith("📅");
+        
+        if (grupoTemData) {
+            // Se o grupo já tem a data, mostra apenas horário
+            SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            String horario = sdfHora.format(horaInicio) + " - " + sdfHora.format(horaFim);
+            textViewHorario.setText("🕐 " + horario);
+        } else {
+            // Se o grupo não tem a data, mostra data e horário
+            SimpleDateFormat sdfData = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            String dataFormatada = sdfData.format(horaInicio);
+            String horario = sdfHora.format(horaInicio) + " - " + sdfHora.format(horaFim);
+            textViewHorario.setText("📅 " + dataFormatada + " • " + horario);
+        }
 
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         String valorFormatado = currencyFormatter.format(agendamento.getValor());
@@ -123,7 +137,7 @@ public class AgendaExpandableListAdapter extends BaseExpandableListAdapter {
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         String totalFormatado = currencyFormatter.format(totalCliente);
 
-        // Mostra "Nome do Cliente • Valor: R$ X"
+        // headerTitle já contém "📅 DD/MM/YYYY • Nome Cliente", então só adiciona o valor
         textViewClientName.setText(headerTitle + " • Valor: " + totalFormatado);
 
         return convertView;

@@ -6,11 +6,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".VendasActivity">
+    tools:context=".AgendaListaActivity">
 
     <!-- Botão Voltar -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonVoltarVendas"
+        android:id="@+id/buttonVoltar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
@@ -31,58 +31,51 @@
         app:strokeWidth="0dp">
 
         <TextView
-            android:id="@+id/textViewTituloVendas"
+            android:id="@+id/textViewTitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:text="📊 Lista de Vendas"
+            android:text="📋 Todos os Agendamentos"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:textSize="20sp"
             android:gravity="center" />
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Botão Nova Venda -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonNovaVenda"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginBottom="16dp"
-        android:minHeight="56dp"
-        android:paddingVertical="14dp"
-        android:paddingHorizontal="16dp"
-        android:text="➕ Nova Venda"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textAllCaps="false"
-        app:icon="@android:drawable/ic_input_add"
-        app:iconGravity="textStart"
-        app:iconPadding="10dp"
-        app:iconSize="22dp"
-        app:cornerRadius="12dp"
-        style="@style/Widget.Material3.Button" />
-
-    <com.google.android.material.textfield.TextInputLayout
+    <!-- Filtro de status -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:hint="Buscar por cliente ou produto"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:strokeWidth="0dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editTextBuscarVendas"
+        <Spinner
+            android:id="@+id/spinnerStatusFilter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:padding="12dp"
+            android:minHeight="48dp" />
+    </com.google.android.material.card.MaterialCardView>
 
-    <ListView
-        android:id="@+id/listViewVendas"
+    <TextView
+        android:id="@+id/textViewDica"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="32dp"
+        android:text="💡 Dica: Pressione e segure um agendamento para editar ou apagar."
+        android:textSize="14sp"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <ExpandableListView
+        android:id="@+id/expandableListViewAgendamentos"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="@dimen/spacing_small"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="@dimen/spacing_small" />
+        android:layout_marginTop="8dp" />
 
 </LinearLayout>
+

@@ -43,7 +43,7 @@ public class AgendaReminderReceiver extends BroadcastReceiver {
             }
         }
 
-        Intent openIntent = new Intent(context, ClienteActivity.class);
+        Intent openIntent = new Intent(context, MenuActivity.class);
         openIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         android.app.PendingIntent contentPi = android.app.PendingIntent.getActivity(
                 context,

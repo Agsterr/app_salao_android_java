@@ -3,13 +3,14 @@ package com.example.appdetestes;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.button.MaterialButton;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,14 +25,20 @@ public class BackupActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<Intent> createDocumentLauncher;
     private ActivityResultLauncher<Intent> openDocumentLauncher;
+    private MaterialButton buttonVoltar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_backup);
 
-        Button buttonExportar = findViewById(R.id.buttonExportar);
-        Button buttonImportar = findViewById(R.id.buttonImportar);
+        MaterialButton buttonExportar = findViewById(R.id.buttonExportar);
+        MaterialButton buttonImportar = findViewById(R.id.buttonImportar);
+        buttonVoltar = findViewById(R.id.buttonVoltar);
+
+        if (buttonVoltar != null) {
+            buttonVoltar.setOnClickListener(v -> finish());
+        }
 
         // Exportar: criar documento via SAF
         createDocumentLauncher = registerForActivityResult(

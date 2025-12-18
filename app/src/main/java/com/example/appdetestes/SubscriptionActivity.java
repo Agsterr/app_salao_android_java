@@ -3,9 +3,10 @@ package com.example.appdetestes;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.button.MaterialButton;
 
 // Implementa as interfaces para receber os callbacks
 public class SubscriptionActivity extends AppCompatActivity implements 
@@ -13,7 +14,7 @@ public class SubscriptionActivity extends AppCompatActivity implements
         BillingManager.BillingReadyListener {
 
     private BillingManager billingManager;
-    private Button buttonAssinar;
+    private MaterialButton buttonAssinar;
 
     // IMPORTANTE: Substitua este valor pelo ID real da sua assinatura no Google Play Console
     private static final String ID_PRODUTO_ASSINATURA = "sua_assinatura_id";
@@ -47,7 +48,7 @@ public class SubscriptionActivity extends AppCompatActivity implements
         runOnUiThread(() -> {
             if (isSubscribed) {
                 // Assinatura ativa, navega para a tela principal
-                Intent intent = new Intent(SubscriptionActivity.this, ClienteActivity.class);
+                Intent intent = new Intent(SubscriptionActivity.this, MenuActivity.class);
                 startActivity(intent);
                 finish();
             } else {

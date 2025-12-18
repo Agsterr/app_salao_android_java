@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".AgendaPessoalActivity">
+
+    <!-- Botão Voltar -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonVoltar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="← Voltar"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_revert"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        style="@style/Widget.Material3.Button.TextButton" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonToggleCalendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fechar calendário"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_close_clear_cancel"
+        app:iconGravity="textStart"
+        style="@style/Widget.Material3.Button.TextButton" />
+
+    <CalendarView
+        android:id="@+id/calendarAgendaView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
+    <!-- Botão destacado para adicionar compromisso -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonAdicionarAgendaInline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="12dp"
+        android:text="➕ Adicionar Compromisso"
+        android:textAllCaps="false"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:minHeight="64dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="18dp"
+        android:elevation="4dp"
+        app:icon="@android:drawable/ic_input_add"
+        app:iconGravity="textStart"
+        app:iconPadding="14dp"
+        app:iconSize="28dp"
+        app:cornerRadius="16dp"
+        style="@style/Widget.Material3.Button" />
+
+    <!-- Filtro de status da agenda -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:strokeWidth="0dp">
+
+        <Spinner
+            android:id="@+id/spinnerAgendaFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:minHeight="48dp" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <ListView
+        android:id="@+id/listViewAgenda"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="12dp"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp" />
+
+</LinearLayout>
+

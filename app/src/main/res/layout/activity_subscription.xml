@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="@dimen/container_padding"
     tools:context=".SubscriptionActivity">
 
     <TextView
@@ -13,13 +13,14 @@
         android:layout_height="wrap_content"
         android:text="Sua assinatura expirou ou não está ativa."
         android:textAlignment="center"
-        android:textSize="18sp" />
+        android:textSize="@dimen/text_size_large" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonAssinar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="@dimen/spacing_large"
+        android:paddingVertical="@dimen/spacing_medium"
         android:text="Assinar Agora" />
 
 </LinearLayout>

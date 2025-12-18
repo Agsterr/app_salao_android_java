@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".AgendaActivity">
+
+    <!-- Botão Voltar -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonVoltar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="← Voltar"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_revert"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        style="@style/Widget.Material3.Button.TextButton" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Agenda e Agendamentos"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Botão Calendário -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonCalendario"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:minHeight="72dp"
+        android:paddingVertical="18dp"
+        android:paddingHorizontal="16dp"
+        android:text="📅 Agendar"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_today"
+        app:iconGravity="textStart"
+        app:iconPadding="14dp"
+        app:iconSize="28dp"
+        app:cornerRadius="16dp"
+        style="@style/Widget.Material3.Button" />
+
+    <!-- Botão Totais/Relatórios -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonTotais"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:minHeight="72dp"
+        android:paddingVertical="18dp"
+        android:paddingHorizontal="16dp"
+        android:text="💰 Ver Totais e Lucros"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_recent_history"
+        app:iconGravity="textStart"
+        app:iconPadding="14dp"
+        app:iconSize="28dp"
+        app:cornerRadius="16dp"
+        style="@style/Widget.Material3.Button.OutlinedButton" />
+
+    <!-- Botão Agendamentos do Dia -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonAgendamentos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:minHeight="72dp"
+        android:paddingVertical="18dp"
+        android:paddingHorizontal="16dp"
+        android:text="📋 Ver Agendamentos"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_view"
+        app:iconGravity="textStart"
+        app:iconPadding="14dp"
+        app:iconSize="28dp"
+        app:cornerRadius="16dp"
+        style="@style/Widget.Material3.Button.OutlinedButton" />
+
+</LinearLayout>
+

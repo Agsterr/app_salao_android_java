@@ -1,5 +1,6 @@
 package com.example.appdetestes;
 
+import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -7,9 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
+import android.content.pm.PackageManager;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 public final class UpdateNotifier {
     private static final String CHANNEL_ID = "updates_channel";
@@ -37,6 +40,10 @@ public final class UpdateNotifier {
                 .setAutoCancel(true)
                 .setContentIntent(pi);
 
+        if (Build.VERSION.SDK_INT >= 33
+                && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         NotificationManagerCompat.from(context).notify(2002, builder.build());
     }
 

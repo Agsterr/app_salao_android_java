@@ -4,11 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.button.MaterialButton;
 
 public class ChangePasswordActivity extends AppCompatActivity {
 
@@ -20,7 +21,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private EditText editTextSenhaAtual;
     private EditText editTextNovoUsuario;
     private EditText editTextNovaSenha;
-    private Button buttonSalvar;
+    private MaterialButton buttonSalvar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

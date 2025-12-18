@@ -1,11 +1,11 @@
 package com.example.appdetestes;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -24,6 +24,7 @@ import android.content.pm.ShortcutManager;
 import android.os.Build;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -35,19 +36,23 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.google.android.material.button.MaterialButton;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText editTextUsuario;
     private EditText editTextSenha;
-    private Button buttonLogin;
-    private Button buttonAlterarSenha;
+    private MaterialButton buttonLogin;
+    private MaterialButton buttonAlterarSenha;
     private CheckBox checkBoxLembrar;
     private ActivityResultLauncher<String> imagePickerLauncher;
+    private ActivityResultLauncher<String> postNotificationsPermissionLauncher;
 
     private static final String PREFS_NAME = "AppDeTestesPrefs";
     private static final String PREF_USUARIO = "usuario"; // apenas para lembrar preenchimento
     private static final String PREF_SENHA = "senha";     // apenas para lembrar preenchimento
     private static final String PREF_LEMBRAR = "lembrar";
+    private static final String PREF_ASKED_POST_NOTIFICATIONS = "asked_post_notifications";
 
     // Credenciais configuradas pelo usuário (persistência real de login)
     private static final String PREF_CONFIG_USUARIO = "config_usuario";
@@ -67,6 +72,24 @@ public class LoginActivity extends AppCompatActivity {
         buttonAlterarSenha = findViewById(R.id.buttonAlterarSenha);
         checkBoxLembrar = findViewById(R.id.checkBoxLembrar);
 
+        postNotificationsPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (!isGranted) {
+                        Toast.makeText(this, "Ative notificações para receber avisos de atualização.", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+        if (Build.VERSION.SDK_INT >= 33
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            boolean asked = prefs.getBoolean(PREF_ASKED_POST_NOTIFICATIONS, false);
+            if (!asked) {
+                prefs.edit().putBoolean(PREF_ASKED_POST_NOTIFICATIONS, true).apply();
+                postNotificationsPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+
         // Inicializa seletor de imagem da galeria
         imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
             if (uri != null) {
@@ -75,8 +98,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         // Botões para trocar ícone do app
-        Button buttonIconPadrao = findViewById(R.id.buttonIconPadrao);
-        Button buttonIconAlternativo = findViewById(R.id.buttonIconAlternativo);
+        MaterialButton buttonIconPadrao = findViewById(R.id.buttonIconPadrao);
+        MaterialButton buttonIconAlternativo = findViewById(R.id.buttonIconAlternativo);
         if (buttonIconPadrao != null && buttonIconAlternativo != null) {
             buttonIconPadrao.setOnClickListener(v -> setIconVariant(false));
             buttonIconAlternativo.setOnClickListener(v -> showIconAltOptions());
@@ -152,7 +175,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void autenticarComSucesso() {
         salvarOuLimparCredenciais();
-        Intent intent = new Intent(LoginActivity.this, ClienteActivity.class);
+        Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
         startActivity(intent);
         finish();
     }

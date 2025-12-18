@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/container_padding"
-    tools:context=".ClienteActivity">
+    tools:context=".MenuActivity">
 
     <EditText
         android:id="@+id/editTextNome"
@@ -28,26 +28,48 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonSalvar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingVertical="8dp"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:text="Clientes" />
+                android:text="👥 Clientes"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_view"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonGerenciarServicos"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="@dimen/header_button_spacing"
-                android:paddingVertical="8dp"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:text="Serviços" />
+                android:text="🔧 Serviços"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_manage"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
         </LinearLayout>
 
         <LinearLayout
@@ -56,26 +78,48 @@
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/header_button_spacing">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonGerenciarProdutos"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingVertical="8dp"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:text="Produtos" />
+                android:text="📦 Produtos"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_view"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonVerAgenda"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="@dimen/header_button_spacing"
-                android:paddingVertical="8dp"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:text="Ver Agenda" />
+                android:text="📅 Ver Agenda"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_recent_history"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
         </LinearLayout>
 
         <LinearLayout
@@ -84,72 +128,47 @@
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/header_button_spacing">
 
-            <Button
-                android:id="@+id/buttonBackup"
-                android:layout_width="match_parent"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonAgendaPessoal"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:paddingVertical="8dp"
-                android:text="Backup" />
+                android:layout_weight="1"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="📝 Agenda Pessoal"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_today"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonBackup"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/header_button_spacing"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
+                android:text="💾 Backup"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_save"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
         </LinearLayout>
-    </LinearLayout>
-
-
-
-    <LinearLayout
-        android:id="@+id/layoutAgendaHeader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="@dimen/spacing_medium">
-
-        <Button
-            android:id="@+id/textViewAgendaLegenda"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Agenda pessoal"
-            android:textStyle="bold"
-            android:textSize="@dimen/text_size_medium" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/layoutAgendaContent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="@dimen/spacing_small"
-        android:visibility="gone">
-
-        <Button
-            android:id="@+id/buttonToggleCalendar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Fechar calendário" />
-
-        <CalendarView
-            android:id="@+id/calendarAgendaView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/buttonAdicionarAgendaInline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Adicionar Compromisso" />
-
-        <!-- Filtro de status da agenda -->
-        <Spinner
-            android:id="@+id/spinnerAgendaFilter"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_small" />
-
-        <ListView
-            android:id="@+id/listViewAgenda"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="@dimen/spacing_small" />
     </LinearLayout>
 
     <LinearLayout
@@ -169,11 +188,16 @@
             android:textStyle="bold"
             android:textSize="@dimen/text_size_medium" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonAdicionarClienteInline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Adicionar Cliente" />
+            android:text="Adicionar Cliente"
+            android:textAllCaps="false"
+            app:icon="@android:drawable/ic_input_add"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            style="@style/Widget.Material3.Button.TonalButton" />
     </LinearLayout>
 
     <EditText
@@ -210,11 +234,16 @@
             android:textStyle="bold"
             android:textSize="@dimen/text_size_medium" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonAdicionarServicoInline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Adicionar Serviço" />
+            android:text="Adicionar Serviço"
+            android:textAllCaps="false"
+            app:icon="@android:drawable/ic_input_add"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            style="@style/Widget.Material3.Button.TonalButton" />
     </LinearLayout>
 
     <EditText

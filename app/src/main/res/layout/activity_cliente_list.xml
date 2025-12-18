@@ -6,14 +6,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".VendasActivity">
+    tools:context=".ClienteActivity">
 
     <!-- Botão Voltar -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonVoltarVendas"
+        android:id="@+id/buttonVoltar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:text="← Voltar"
         android:textAllCaps="false"
         app:icon="@android:drawable/ic_menu_revert"
@@ -21,68 +21,61 @@
         app:iconPadding="8dp"
         style="@style/Widget.Material3.Button.TextButton" />
 
-    <!-- Título -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         app:cardCornerRadius="8dp"
         app:cardElevation="2dp"
         app:strokeWidth="0dp">
 
-        <TextView
-            android:id="@+id/textViewTituloVendas"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text="📊 Lista de Vendas"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:gravity="center" />
-    </com.google.android.material.card.MaterialCardView>
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical">
 
-    <!-- Botão Nova Venda -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonNovaVenda"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginBottom="16dp"
-        android:minHeight="56dp"
-        android:paddingVertical="14dp"
-        android:paddingHorizontal="16dp"
-        android:text="➕ Nova Venda"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textAllCaps="false"
-        app:icon="@android:drawable/ic_input_add"
-        app:iconGravity="textStart"
-        app:iconPadding="10dp"
-        app:iconSize="22dp"
-        app:cornerRadius="12dp"
-        style="@style/Widget.Material3.Button" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Lista de Clientes"
+                android:textStyle="bold"
+                android:textSize="18sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonAdicionarCliente"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Adicionar"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_input_add"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:hint="Buscar por cliente ou produto"
+        android:layout_marginTop="12dp"
+        android:hint="Buscar clientes"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editTextBuscarVendas"
+            android:id="@+id/editTextBuscarClientes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <ListView
-        android:id="@+id/listViewVendas"
+        android:id="@+id/listViewClientes"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="@dimen/spacing_small"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="@dimen/spacing_small" />
+        android:layout_marginTop="12dp" />
 
 </LinearLayout>
+

@@ -85,7 +85,7 @@ public class UpdatesActivity extends AppCompatActivity {
             DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
             DownloadManager.Request req = new DownloadManager.Request(Uri.parse(url));
             req.setTitle("Baixando atualização");
-            req.setDescription("AppDeTestes");
+            req.setDescription("Gerenciamento Total Mais");
             req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             req.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
             currentDownloadId = dm.enqueue(req);

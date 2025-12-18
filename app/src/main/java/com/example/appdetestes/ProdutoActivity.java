@@ -14,7 +14,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.PopupMenu;
 import android.net.Uri;
 import android.os.Environment;
 import android.content.Context;
@@ -35,11 +37,11 @@ import java.util.Locale;
 public class ProdutoActivity extends AppCompatActivity {
 
     private Button buttonNovoProduto;
-    private Button buttonVerRecebimentos;
     private Button buttonVerVendas;
-    private Button buttonVoltarProdutos;
+    private Button buttonVoltar;
     private EditText editTextBuscarProdutos;
     private ListView listViewProdutos;
+    private com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton fabAdicionarProduto;
 
     private ProdutoDAO produtoDAO;
     private ArrayAdapter<Produto> produtosAdapter;
@@ -64,15 +66,16 @@ public class ProdutoActivity extends AppCompatActivity {
         produtoDAO.open();
 
         buttonNovoProduto = findViewById(R.id.buttonNovoProduto);
-        buttonVerRecebimentos = findViewById(R.id.buttonVerRecebimentos);
         buttonVerVendas = findViewById(R.id.buttonVerVendas);
-        buttonVoltarProdutos = findViewById(R.id.buttonVoltarProdutos);
+        buttonVoltar = findViewById(R.id.buttonVoltar);
         editTextBuscarProdutos = findViewById(R.id.editTextBuscarProdutos);
         listViewProdutos = findViewById(R.id.listViewProdutos);
+        fabAdicionarProduto = findViewById(R.id.fabAdicionarProduto);
 
-        buttonVoltarProdutos.setOnClickListener(v -> finish());
-        buttonNovoProduto.setOnClickListener(v -> mostrarDialogProduto(null));
-        buttonVerRecebimentos.setOnClickListener(v -> {
+        if (buttonVoltar != null) {
+            buttonVoltar.setOnClickListener(v -> finish());
+        }
+        buttonNovoProduto.setOnClickListener(v -> {
             Intent intent = new Intent(ProdutoActivity.this, RecebimentosActivity.class);
             startActivity(intent);
         });
@@ -80,6 +83,9 @@ public class ProdutoActivity extends AppCompatActivity {
             Intent intent = new Intent(ProdutoActivity.this, VendasActivity.class);
             startActivity(intent);
         });
+        if (fabAdicionarProduto != null) {
+            fabAdicionarProduto.setOnClickListener(v -> mostrarDialogProduto(null));
+        }
 
         editTextBuscarProdutos.addTextChangedListener(new android.text.TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -89,7 +95,6 @@ public class ProdutoActivity extends AppCompatActivity {
             @Override public void afterTextChanged(android.text.Editable s) {}
         });
 
-        registerForContextMenu(listViewProdutos);
         atualizarListaProdutos();
 
         // Inicializa launchers de câmera e galeria
@@ -313,7 +318,7 @@ public class ProdutoActivity extends AppCompatActivity {
     }
 
     // Adapter customizado para mostrar imagem ao lado do nome
-    private static class ProdutoListAdapter extends ArrayAdapter<Produto> {
+    private class ProdutoListAdapter extends ArrayAdapter<Produto> {
         private final LayoutInflater inflater;
 
         ProdutoListAdapter(Context context) {
@@ -331,6 +336,7 @@ public class ProdutoActivity extends AppCompatActivity {
             ImageView imageView = view.findViewById(R.id.imageThumb);
             TextView textNome = view.findViewById(R.id.textNome);
             TextView textPreco = view.findViewById(R.id.textPreco);
+            ImageButton buttonMenu = view.findViewById(R.id.buttonMenuProduto);
 
             if (produto != null) {
                 textNome.setText(produto.getNome());
@@ -345,6 +351,52 @@ public class ProdutoActivity extends AppCompatActivity {
                     }
                 } else {
                     imageView.setImageResource(R.mipmap.ic_launcher);
+                }
+                
+                // Configura o menu de 3 pontinhos
+                if (buttonMenu != null) {
+                    buttonMenu.setOnClickListener(v -> {
+                        PopupMenu popupMenu = new PopupMenu(ProdutoActivity.this, buttonMenu);
+                        popupMenu.getMenuInflater().inflate(R.menu.menu_contexto_produto, popupMenu.getMenu());
+                        popupMenu.setOnMenuItemClickListener(item -> {
+                            if (item.getItemId() == R.id.menu_editar) {
+                                mostrarDialogProduto(produto);
+                                return true;
+                            } else if (item.getItemId() == R.id.menu_apagar) {
+                                confirmarApagarProduto(produto);
+                                return true;
+                            } else if (item.getItemId() == R.id.menu_vender) {
+                                Intent intent = new Intent(ProdutoActivity.this, RegistrarVendaActivity.class);
+                                intent.putExtra("produto_id", produto.getId());
+                                startActivity(intent);
+                                return true;
+                            } else if (item.getItemId() == R.id.menu_compartilhar) {
+                                StringBuilder sb = new StringBuilder();
+                                sb.append("Produto: ").append(produto.getNome());
+                                sb.append("\nValor padrão: ").append(NumberFormat.getCurrencyInstance(new Locale("pt", "BR")).format(produto.getValorPadrao()));
+                                if (produto.getDescricao() != null && !produto.getDescricao().trim().isEmpty()) {
+                                    sb.append("\nDescrição: ").append(produto.getDescricao());
+                                }
+                                String texto = sb.toString();
+
+                                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                if (produto.getImagemUri() != null && !produto.getImagemUri().trim().isEmpty()) {
+                                    Uri imageUri = Uri.parse(produto.getImagemUri());
+                                    shareIntent.setType("image/*");
+                                    shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
+                                    shareIntent.putExtra(Intent.EXTRA_TEXT, texto);
+                                } else {
+                                    shareIntent.setType("text/plain");
+                                    shareIntent.putExtra(Intent.EXTRA_TEXT, texto);
+                                }
+                                startActivity(Intent.createChooser(shareIntent, "Compartilhar produto"));
+                                return true;
+                            }
+                            return false;
+                        });
+                        popupMenu.show();
+                    });
                 }
             }
             return view;

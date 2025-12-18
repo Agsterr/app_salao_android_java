@@ -348,6 +348,28 @@ public class AgendamentoDAO {
         return agendamentos;
     }
 
+    public List<Agendamento> getAgendamentosPorPeriodo(long inicioTimestamp, long fimTimestamp) {
+        List<Agendamento> agendamentos = new ArrayList<>();
+
+        String query = "SELECT a.*, c." + DatabaseHelper.COLUMN_CLIENTE_NOME + " AS " + ALIAS_CLIENTE_NOME + ", s." + DatabaseHelper.COLUMN_SERVICO_NOME + " AS " + ALIAS_SERVICO_NOME + ", s." + DatabaseHelper.COLUMN_SERVICO_TEMPO + " " +
+                "FROM " + DatabaseHelper.TABLE_AGENDAMENTOS + " a " +
+                "LEFT JOIN " + DatabaseHelper.TABLE_CLIENTES + " c ON a." + DatabaseHelper.COLUMN_AGENDAMENTO_CLIENTE_ID + " = c." + DatabaseHelper.COLUMN_CLIENTE_ID + " " +
+                "LEFT JOIN " + DatabaseHelper.TABLE_SERVICOS + " s ON a." + DatabaseHelper.COLUMN_AGENDAMENTO_SERVICO_ID + " = s." + DatabaseHelper.COLUMN_SERVICO_ID + " " +
+                "WHERE a." + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + " >= ? AND a." + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + " <= ? " +
+                "ORDER BY a." + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + " ASC";
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(inicioTimestamp), String.valueOf(fimTimestamp)});
+        
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Agendamento agendamento = cursorToAgendamento(cursor);
+                agendamentos.add(agendamento);
+            }
+            cursor.close();
+        }
+        return agendamentos;
+    }
+
     private Agendamento cursorToAgendamento(Cursor cursor) {
         Agendamento agendamento = new Agendamento();
 
@@ -415,10 +437,19 @@ public class AgendamentoDAO {
                 new String[]{String.valueOf(inicio), String.valueOf(fim)}
         );
         if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                total = cursor.getDouble(0);
+            try {
+                if (cursor.moveToFirst()) {
+                    // SUM retorna o resultado na primeira coluna (índice 0)
+                    if (!cursor.isNull(0)) {
+                        total = cursor.getDouble(0);
+                        if (Double.isNaN(total)) {
+                            total = 0.0;
+                        }
+                    }
+                }
+            } finally {
+                cursor.close();
             }
-            cursor.close();
         }
         return total;
     }

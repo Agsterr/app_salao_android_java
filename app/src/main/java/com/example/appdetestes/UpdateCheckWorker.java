@@ -61,7 +61,7 @@ public class UpdateCheckWorker extends Worker {
             conn.setReadTimeout(15000);
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/vnd.github+json");
-            conn.setRequestProperty("User-Agent", "appDeTestes/" + BuildConfig.VERSION_NAME + " (Android " + Build.VERSION.SDK_INT + ")");
+            conn.setRequestProperty("User-Agent", "GerenciamentoTotalMais/" + BuildConfig.VERSION_NAME + " (Android " + Build.VERSION.SDK_INT + ")");
             int code = conn.getResponseCode();
             InputStream is = (code >= 200 && code < 300) ? conn.getInputStream() : conn.getErrorStream();
             if (is == null) return null;
