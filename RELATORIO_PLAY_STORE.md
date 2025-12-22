@@ -80,3 +80,7 @@ O app coleta os seguintes dados:
 
 **Recomendação:** Todos esses dados são armazenados localmente no dispositivo. A política de privacidade deve deixar isso claro.
 
+
+
+
+

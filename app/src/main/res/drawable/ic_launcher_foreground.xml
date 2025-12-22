@@ -1,47 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Círculo com gradiente (magenta -> roxo) para a silhueta do salão -->
-    <path android:pathData="M54,20 C70,20 84,34 84,50 C84,66 70,80 54,80 C38,80 24,66 24,50 C24,34 38,20 54,20 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="30"
-                android:startY="30"
-                android:endX="78"
-                android:endY="78">
-                <item android:offset="0.0" android:color="#FF3A8C" />
-                <item android:offset="1.0" android:color="#7B2FFF" />
-            </gradient>
-        </aapt:attr>
-    </path>
+    <!-- Clipboard branco com borda azul (centralizado, ligeiramente à esquerda) -->
+    <group android:translateX="30" android:translateY="20">
+        <!-- Corpo do clipboard -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M8,4 L20,4 L20,26 L8,26 Z" />
+        <!-- Clip do clipboard (topo) -->
+        <path
+            android:fillColor="#2563EB"
+            android:pathData="M6,2 L22,2 L22,6 L6,6 Z" />
+        <!-- Borda azul do clipboard -->
+        <path
+            android:strokeWidth="1.8"
+            android:strokeColor="#2563EB"
+            android:fillColor="#00000000"
+            android:pathData="M8,4 L20,4 L20,26 L8,26 Z" />
+        
+        <!-- Checkmarks verdes (dois ✓) - lado esquerdo -->
+        <path
+            android:strokeWidth="2.5"
+            android:strokeColor="#10B981"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:fillColor="#00000000"
+            android:pathData="M9,8 L10.5,9.5 L13,7" />
+        <path
+            android:strokeWidth="2.5"
+            android:strokeColor="#10B981"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:fillColor="#00000000"
+            android:pathData="M9,12 L10.5,13.5 L13,11" />
+        
+        <!-- Linhas horizontais - lado direito -->
+        <path
+            android:strokeWidth="1.8"
+            android:strokeColor="#6B7280"
+            android:fillColor="#00000000"
+            android:pathData="M14,8 L18,8" />
+        <path
+            android:strokeWidth="1.8"
+            android:strokeColor="#6B7280"
+            android:fillColor="#00000000"
+            android:pathData="M14,11 L18,11" />
+        
+        <!-- Gráfico de barras (amarelo, verde claro, verde escuro) -->
+        <!-- Barra 1 - Amarelo -->
+        <path
+            android:fillColor="#F59E0B"
+            android:pathData="M9,18 L10.5,18 L10.5,22 L9,22 Z" />
+        <!-- Barra 2 - Verde claro -->
+        <path
+            android:fillColor="#34D399"
+            android:pathData="M11.5,18 L13,18 L13,20.5 L11.5,20.5 Z" />
+        <!-- Barra 3 - Verde escuro (mais alta) -->
+        <path
+            android:fillColor="#059669"
+            android:pathData="M14,18 L15.5,18 L15.5,23 L14,23 Z" />
+    </group>
 
-    <!-- Mecha de cabelo dourada (traço arredondado) -->
-    <path
-        android:pathData="M38,36 C50,44 58,54 61,64 C63,71 60,78 52,84"
-        android:strokeWidth="8"
-        android:strokeColor="#F7D768"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000" />
+    <!-- Seta laranja/amarela curvada apontando para cima e direita (passando sobre o clipboard) -->
+    <group android:translateX="12" android:translateY="45">
+        <!-- Corpo da seta -->
+        <path
+            android:strokeWidth="7"
+            android:strokeColor="#F97316"
+            android:strokeLineCap="round"
+            android:fillColor="#00000000"
+            android:pathData="M10,20 Q25,5 45,12 Q60,18 68,28" />
+        <!-- Ponta da seta (triângulo) -->
+        <path
+            android:fillColor="#F97316"
+            android:pathData="M64,25 L72,27 L68,33 Z" />
+        <!-- Contorno branco da seta -->
+        <path
+            android:strokeWidth="1.2"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round"
+            android:fillColor="#00000000"
+            android:pathData="M10,20 Q25,5 45,12 Q60,18 68,28" />
+    </group>
 
-    <!-- Curva adicional para compor o desenho do cabelo -->
-    <path
-        android:pathData="M40,44 C44,40 50,38 56,40 C62,42 66,48 66,54"
-        android:strokeWidth="6"
-        android:strokeColor="#F2C044"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000" />
+    <!-- Engrenagem azul no canto inferior direito (parcialmente atrás dos outros elementos) -->
+    <group android:translateX="65" android:translateY="65">
+        <!-- Dentes da engrenagem -->
+        <path
+            android:fillColor="#2563EB"
+            android:pathData="M18,18 L18,14 L16,14 L16,18 L12,18 L12,16 L8,16 L8,18 L4,18 L4,22 L8,22 L8,24 L12,24 L12,22 L16,22 L16,26 L18,26 L18,22 L22,22 L22,18 Z" />
+        <!-- Contorno branco da engrenagem -->
+        <path
+            android:strokeWidth="1.8"
+            android:strokeColor="#FFFFFF"
+            android:fillColor="#00000000"
+            android:pathData="M18,18 L18,14 L16,14 L16,18 L12,18 L12,16 L8,16 L8,18 L4,18 L4,22 L8,22 L8,24 L12,24 L12,22 L16,22 L16,26 L18,26 L18,22 L22,22 L22,18 Z" />
+        <!-- Centro da engrenagem (círculo branco) -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M13,20 A3,3 0 1,1 13,26 A3,3 0 1,1 13,20 Z" />
+        <!-- Contorno azul do círculo -->
+        <path
+            android:strokeWidth="1.2"
+            android:strokeColor="#2563EB"
+            android:fillColor="#00000000"
+            android:pathData="M13,20 A3,3 0 1,1 13,26 A3,3 0 1,1 13,20 Z" />
+    </group>
 
-    <!-- Indicação de queixo/pescoço para reforçar o perfil -->
-    <path
-        android:pathData="M58,66 C64,66 70,72 72,78"
-        android:strokeWidth="5"
-        android:strokeColor="#E9B93E"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000" />
 </vector>

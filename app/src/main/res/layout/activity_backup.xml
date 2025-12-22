@@ -43,14 +43,14 @@
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/spacing_medium">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonExportar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Exportar para arquivo" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonImportar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

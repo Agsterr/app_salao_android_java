@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,11 +17,19 @@ public class MenuActivity extends AppCompatActivity {
     private Button buttonVerAgenda;
     private Button buttonGerenciarProdutos;
     private Button buttonBackup;
+    private SubscriptionChecker subscriptionChecker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cliente);
+        
+        // Inicializa verificação de assinatura
+        subscriptionChecker = SubscriptionChecker.getInstance(this);
+        subscriptionChecker.initialize();
+        
+        // Verifica assinatura periodicamente (a cada vez que a tela é exibida)
+        verificarAssinatura();
         // Solicitar permissão de notificações no Android 13+
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
@@ -88,6 +97,31 @@ public class MenuActivity extends AppCompatActivity {
                 Intent intent = new Intent(MenuActivity.this, ProdutoActivity.class);
                 startActivity(intent);
             }
+        });
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Verifica assinatura sempre que a tela volta ao foco
+        verificarAssinatura();
+    }
+    
+    /**
+     * Verifica se a assinatura ainda está ativa
+     * Se não estiver, redireciona para tela de assinatura
+     */
+    private void verificarAssinatura() {
+        subscriptionChecker.checkSubscription(isSubscribed -> {
+            runOnUiThread(() -> {
+                if (!isSubscribed) {
+                    // Assinatura expirou ou foi cancelada
+                    Toast.makeText(this, "Sua assinatura expirou. Renove para continuar usando o app.", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(MenuActivity.this, SubscriptionActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            });
         });
     }
 }

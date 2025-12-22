@@ -20,12 +20,16 @@ import android.widget.PopupMenu;
 import android.net.Uri;
 import android.os.Environment;
 import android.content.Context;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,6 +91,8 @@ public class ProdutoActivity extends AppCompatActivity {
             fabAdicionarProduto.setOnClickListener(v -> mostrarDialogProduto(null));
         }
 
+        applyWindowInsets();
+
         editTextBuscarProdutos.addTextChangedListener(new android.text.TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -114,6 +120,47 @@ public class ProdutoActivity extends AppCompatActivity {
         });
     }
 
+    private void applyWindowInsets() {
+        View root = findViewById(R.id.produtoRoot);
+        if (root == null) {
+            return;
+        }
+
+        final int baseFabBottomMargin;
+        if (fabAdicionarProduto != null && fabAdicionarProduto.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            baseFabBottomMargin = ((ViewGroup.MarginLayoutParams) fabAdicionarProduto.getLayoutParams()).bottomMargin;
+        } else {
+            baseFabBottomMargin = 0;
+        }
+
+        final int baseListBottomMargin;
+        if (listViewProdutos != null && listViewProdutos.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            baseListBottomMargin = ((ViewGroup.MarginLayoutParams) listViewProdutos.getLayoutParams()).bottomMargin;
+        } else {
+            baseListBottomMargin = 0;
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+            Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+
+            if (fabAdicionarProduto != null && fabAdicionarProduto.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) fabAdicionarProduto.getLayoutParams();
+                lp.bottomMargin = baseFabBottomMargin + navBars.bottom;
+                fabAdicionarProduto.setLayoutParams(lp);
+            }
+
+            if (listViewProdutos != null && listViewProdutos.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) listViewProdutos.getLayoutParams();
+                lp.bottomMargin = baseListBottomMargin + navBars.bottom;
+                listViewProdutos.setLayoutParams(lp);
+            }
+
+            return insets;
+        });
+
+        ViewCompat.requestApplyInsets(root);
+    }
+
     @Override
     protected void onDestroy() {
         produtoDAO.close();
@@ -123,7 +170,7 @@ public class ProdutoActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);

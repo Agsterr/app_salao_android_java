@@ -16,9 +16,6 @@ public class SubscriptionActivity extends AppCompatActivity implements
     private BillingManager billingManager;
     private MaterialButton buttonAssinar;
 
-    // IMPORTANTE: Substitua este valor pelo ID real da sua assinatura no Google Play Console
-    private static final String ID_PRODUTO_ASSINATURA = "sua_assinatura_id";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,7 +25,7 @@ public class SubscriptionActivity extends AppCompatActivity implements
         buttonAssinar.setVisibility(View.GONE); // Mantém o botão oculto inicialmente
 
         buttonAssinar.setOnClickListener(v -> {
-            billingManager.queryAndLaunchBillingFlow(SubscriptionActivity.this, ID_PRODUTO_ASSINATURA);
+            billingManager.queryAndLaunchBillingFlow(SubscriptionActivity.this, BuildConfig.SUBSCRIPTION_PRODUCT_ID);
         });
 
         // Inicializa o BillingManager, passando a Activity como ouvinte de prontidão

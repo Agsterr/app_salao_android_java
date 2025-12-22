@@ -2,39 +2,126 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+def releaseStoreFilePath = (System.getenv("RELEASE_STORE_FILE") ?: keystoreProperties.getProperty("storeFile"))?.trim()
+def releaseStorePassword = (System.getenv("RELEASE_STORE_PASSWORD") ?: keystoreProperties.getProperty("storePassword"))?.trim()
+def releaseKeyAlias = (System.getenv("RELEASE_KEY_ALIAS") ?: keystoreProperties.getProperty("keyAlias"))?.trim()
+def releaseKeyPassword = (System.getenv("RELEASE_KEY_PASSWORD") ?: keystoreProperties.getProperty("keyPassword"))?.trim()
+def releaseStoreFile = releaseStoreFilePath ? rootProject.file(releaseStoreFilePath) : null
+def hasReleaseSigning = releaseStoreFile && releaseStoreFile.exists() && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
+
+def subscriptionProductId = (System.getenv("SUBSCRIPTION_PRODUCT_ID") ?: "premium_monthly")?.trim()
+
 android {
-    namespace 'com.focodevsistemas.gerenciamento'
-    compileSdk 36
+    namespace = 'com.focodevsistemas.gerenciamento'
+    compileSdk = 36
 
     buildFeatures {
         buildConfig = true
     }
 
-    defaultConfig {
-        applicationId "com.focodevsistemas.gerenciamento"
-        minSdk 28
-        targetSdk 36
-        versionCode 1
-        versionName "1.0"
+    flavorDimensions += "distribution"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    defaultConfig {
+        applicationId = "com.focodevsistemas.gerenciamento"
+        minSdk = 28
+        targetSdk = 36
+        versionCode = 4
+        versionName = "1.0.1"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Configurações do GitHub para verificação de atualizações
         // Substitua pelos valores reais do seu repositório GitHub
         buildConfigField "String", "GITHUB_OWNER", "\"\""
         buildConfigField "String", "GITHUB_REPO", "\"\""
+        buildConfigField "String", "DISTRIBUTION_CHANNEL", "\"prod\""
+        buildConfigField "String", "SUBSCRIPTION_PRODUCT_ID", "\"${subscriptionProductId}\""
+        buildConfigField "String", "BILLING_BACKEND_URL", "\"\""
+        buildConfigField "boolean", "REQUIRE_BACKEND_VALIDATION", "false"
+    }
+
+    productFlavors {
+        prod {
+            dimension "distribution"
+            buildConfigField "String", "DISTRIBUTION_CHANNEL", "\"prod\""
+            buildConfigField "String", "SUBSCRIPTION_PRODUCT_ID", "\"${subscriptionProductId}\""
+            buildConfigField "String", "BILLING_BACKEND_URL", "\"\""
+            buildConfigField "boolean", "REQUIRE_BACKEND_VALIDATION", "false"
+        }
+        playTest {
+            dimension "distribution"
+            buildConfigField "String", "DISTRIBUTION_CHANNEL", "\"test\""
+            buildConfigField "String", "SUBSCRIPTION_PRODUCT_ID", "\"${subscriptionProductId}\""
+            buildConfigField "String", "BILLING_BACKEND_URL", "\"\""
+            buildConfigField "boolean", "REQUIRE_BACKEND_VALIDATION", "false"
+            versionNameSuffix "-test"
+        }
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseStoreFilePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+tasks.matching { (it.name.startsWith("bundle") || it.name.startsWith("assemble")) && it.name.endsWith("Release") }.configureEach {
+    doFirst {
+        if (!hasReleaseSigning) {
+            def missing = []
+            if (!releaseStoreFilePath) {
+                missing << "RELEASE_STORE_FILE (ou storeFile no keystore.properties)"
+            } else if (!releaseStoreFile || !releaseStoreFile.exists()) {
+                missing << "RELEASE_STORE_FILE/storeFile (arquivo não encontrado)"
+            }
+            if (!releaseStorePassword) {
+                missing << "RELEASE_STORE_PASSWORD (ou storePassword no keystore.properties)"
+            }
+            if (!releaseKeyAlias) {
+                missing << "RELEASE_KEY_ALIAS (ou keyAlias no keystore.properties)"
+            }
+            if (!releaseKeyPassword) {
+                missing << "RELEASE_KEY_PASSWORD (ou keyPassword no keystore.properties)"
+            }
+            if (missing.isEmpty() && !keystorePropertiesFile.exists()) {
+                missing << "keystore.properties (ausente no root do projeto)"
+            }
+            throw new GradleException(
+                    "Assinatura de release não configurada.\n" +
+                            "Opção A: crie `keystore.properties` no root do projeto com: storeFile, storePassword, keyAlias, keyPassword.\n" +
+                            "Opção B: exporte as variáveis de ambiente: RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD.\n" +
+                            "Faltando: " + missing.join(", ")
+            )
+        }
     }
 }
 

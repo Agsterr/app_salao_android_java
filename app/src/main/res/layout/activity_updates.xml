@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Baixar e instalar" />
+        android:text="Abrir na Play Store" />
 
     <Button
         android:id="@+id/buttonOlderVersions"
@@ -31,6 +31,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Observação: para instalar uma versão mais antiga (downgrade), pode ser necessário desinstalar a versão atual. Use a tela de Backup para exportar seus dados antes e importar depois." />
+        android:text="Observação: as atualizações devem ser feitas pela Play Store. Use a tela de Backup para exportar seus dados antes de trocar de versão." />
 
 </LinearLayout>

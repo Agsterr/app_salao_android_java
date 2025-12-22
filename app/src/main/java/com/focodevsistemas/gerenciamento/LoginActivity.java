@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -97,18 +99,23 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Botões para trocar ícone do app
-        MaterialButton buttonIconPadrao = findViewById(R.id.buttonIconPadrao);
-        MaterialButton buttonIconAlternativo = findViewById(R.id.buttonIconAlternativo);
-        if (buttonIconPadrao != null && buttonIconAlternativo != null) {
-            buttonIconPadrao.setOnClickListener(v -> setIconVariant(false));
-            buttonIconAlternativo.setOnClickListener(v -> showIconAltOptions());
-        }
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 login();
             }
+        });
+
+        editTextSenha.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+                login();
+                return true;
+            }
+            return false;
         });
 
         buttonAlterarSenha.setOnClickListener(v -> {
@@ -129,6 +136,20 @@ public class LoginActivity extends AppCompatActivity {
             editTextUsuario.setText(usuario);
             editTextSenha.setText(senha);
             checkBoxLembrar.setChecked(true);
+        } else {
+            // Preenche com credenciais padrão se não houver credenciais salvas
+            String usuarioSalvo = prefs.getString(PREF_USUARIO, "");
+            String senhaSalva = prefs.getString(PREF_SENHA, "");
+            
+            if (usuarioSalvo.isEmpty() && senhaSalva.isEmpty()) {
+                // Primeira vez - preenche com padrão
+                editTextUsuario.setText("admin");
+                editTextSenha.setText("admin");
+            } else {
+                // Usa as credenciais salvas mesmo sem checkbox marcado
+                editTextUsuario.setText(usuarioSalvo);
+                editTextSenha.setText(senhaSalva);
+            }
         }
     }
 
@@ -175,9 +196,26 @@ public class LoginActivity extends AppCompatActivity {
 
     private void autenticarComSucesso() {
         salvarOuLimparCredenciais();
-        Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
-        startActivity(intent);
-        finish();
+        
+        // Verifica assinatura antes de permitir acesso
+        SubscriptionChecker subscriptionChecker = SubscriptionChecker.getInstance(this);
+        subscriptionChecker.initialize();
+        
+        subscriptionChecker.checkSubscription(isSubscribed -> {
+            runOnUiThread(() -> {
+                if (isSubscribed) {
+                    // Assinatura ativa, permite acesso
+                    Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    // Sem assinatura, redireciona para tela de assinatura
+                    Intent intent = new Intent(LoginActivity.this, SubscriptionActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            });
+        });
     }
 
     private void showIconAltOptions() {

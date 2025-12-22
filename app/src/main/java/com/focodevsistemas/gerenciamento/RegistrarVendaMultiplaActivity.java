@@ -48,6 +48,7 @@ public class RegistrarVendaMultiplaActivity extends AppCompatActivity {
 
     private List<VendaItem> itensVenda = new ArrayList<>();
     private ArrayAdapter<String> itensAdapter;
+    private ArrayAdapter<Cliente> clienteAdapter;
 
     private Long dataPrimeiraParcelaMillis = null;
     private long vendaIdEdit = -1;
@@ -95,7 +96,7 @@ public class RegistrarVendaMultiplaActivity extends AppCompatActivity {
         placeholder.setNome("Selecione um cliente");
         clientesComPlaceholder.add(placeholder);
         clientesComPlaceholder.addAll(clientes);
-        ArrayAdapter<Cliente> clienteAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, clientesComPlaceholder);
+        clienteAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, clientesComPlaceholder);
         clienteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCliente.setAdapter(clienteAdapter);
         spinnerCliente.setSelection(0);
@@ -366,12 +367,18 @@ public class RegistrarVendaMultiplaActivity extends AppCompatActivity {
         if (v == null) return;
 
         // Seleciona cliente
-        ArrayAdapter<Cliente> adapter = (ArrayAdapter<Cliente>) spinnerCliente.getAdapter();
-        for (int i = 0; i < adapter.getCount(); i++) {
-            Cliente c = adapter.getItem(i);
-            if (c != null && c.getId() == v.getClienteId()) {
-                spinnerCliente.setSelection(i);
-                break;
+        android.widget.SpinnerAdapter currentAdapter = spinnerCliente.getAdapter();
+        if (currentAdapter instanceof ArrayAdapter) {
+            ArrayAdapter<?> adapter = (ArrayAdapter<?>) currentAdapter;
+            for (int i = 0; i < adapter.getCount(); i++) {
+                Object item = adapter.getItem(i);
+                if (item instanceof Cliente) {
+                    Cliente c = (Cliente) item;
+                    if (c.getId() == v.getClienteId()) {
+                        spinnerCliente.setSelection(i);
+                        break;
+                    }
+                }
             }
         }
 
@@ -427,7 +434,7 @@ public class RegistrarVendaMultiplaActivity extends AppCompatActivity {
                     Cliente placeholder = new Cliente(); placeholder.setId(0); placeholder.setNome("Selecione um cliente");
                     clientesComPlaceholder.add(placeholder);
                     clientesComPlaceholder.addAll(clientes);
-                    ArrayAdapter<Cliente> clienteAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, clientesComPlaceholder);
+                    clienteAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, clientesComPlaceholder);
                     clienteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     spinnerCliente.setAdapter(clienteAdapter);
                     // Seleciona recém-criado
@@ -455,7 +462,7 @@ public class RegistrarVendaMultiplaActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
-        if (item.getItemId() == android.R.id.home) { onBackPressed(); return true; }
+        if (item.getItemId() == android.R.id.home) { finish(); return true; }
         return super.onOptionsItemSelected(item);
     }
 }

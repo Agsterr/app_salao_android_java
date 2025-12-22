@@ -58,6 +58,7 @@ public class BillingManager {
 
         // Parâmetros para compras pendentes
         PendingPurchasesParams pendingPurchasesParams = PendingPurchasesParams.newBuilder()
+                .enableOneTimeProducts()
                 .build();
 
         // Criação do cliente de faturamento

@@ -19,12 +19,11 @@ public final class UpdateNotifier {
 
     private UpdateNotifier() {}
 
-    public static void notifyUpdateAvailable(Context context, String latestVersion, String downloadUrl) {
+    public static void notifyUpdateAvailable(Context context, String latestVersion) {
         ensureChannel(context);
 
         Intent intent = new Intent(context, UpdatesActivity.class);
         intent.putExtra("latestVersion", latestVersion);
-        intent.putExtra("downloadUrl", downloadUrl);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent pi = PendingIntent.getActivity(
@@ -35,7 +34,7 @@ public final class UpdateNotifier {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("Atualização disponível")
-                .setContentText("Versão " + latestVersion + " disponível para download")
+                .setContentText("Versão " + latestVersion + " disponível na Play Store")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(pi);

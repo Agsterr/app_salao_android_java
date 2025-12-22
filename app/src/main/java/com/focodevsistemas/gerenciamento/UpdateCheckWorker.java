@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -42,8 +41,7 @@ public class UpdateCheckWorker extends Worker {
             String versionCurrent = normalizeVersion(BuildConfig.VERSION_NAME);
             boolean isNewer = isVersionNewer(versionCurrent, versionLatest);
             if (isNewer) {
-                String downloadUrl = findApkAssetUrl(latest);
-                UpdateNotifier.notifyUpdateAvailable(getApplicationContext(), versionLatest, downloadUrl);
+                UpdateNotifier.notifyUpdateAvailable(getApplicationContext(), versionLatest);
             }
             return Result.success();
         } catch (Exception e) {
@@ -80,24 +78,6 @@ public class UpdateCheckWorker extends Worker {
             if (conn != null) {
                 conn.disconnect();
             }
-        }
-    }
-
-    private String findApkAssetUrl(JSONObject releaseObj) {
-        try {
-            JSONArray assets = releaseObj.optJSONArray("assets");
-            if (assets == null) return null;
-            for (int i = 0; i < assets.length(); i++) {
-                JSONObject a = assets.getJSONObject(i);
-                String name = a.optString("name", "");
-                String url = a.optString("browser_download_url", null);
-                if (name.endsWith(".apk") && url != null) {
-                    return url;
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            return null;
         }
     }
 
