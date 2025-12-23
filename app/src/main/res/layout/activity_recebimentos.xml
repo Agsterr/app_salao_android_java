@@ -66,6 +66,18 @@
             style="@style/Widget.Material3.Button.OutlinedButton" />
     </LinearLayout>
 
+    <!-- Botão Exportar PDF -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonExportarPDFRecebimentos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="📄 Exportar PDF"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_upload"
+        app:iconGravity="textStart"
+        style="@style/Widget.Material3.Button.OutlinedButton" />
+
     <ListView
         android:id="@+id/listViewRecebimentos"
         android:layout_width="match_parent"

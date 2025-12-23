@@ -23,6 +23,8 @@ public class ProdutoDAO {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COLUMN_PRODUTO_NOME, produto.getNome());
         values.put(DatabaseHelper.COLUMN_PRODUTO_VALOR_PADRAO, produto.getValorPadrao());
+        values.put(DatabaseHelper.COLUMN_PRODUTO_PRECO_AQUISICAO, produto.getPrecoAquisicao());
+        values.put(DatabaseHelper.COLUMN_PRODUTO_PRECO_VENDA, produto.getPrecoVenda());
         values.put(DatabaseHelper.COLUMN_PRODUTO_DESCRICAO, produto.getDescricao());
         values.put(DatabaseHelper.COLUMN_PRODUTO_IMAGEM_URI, produto.getImagemUri());
         return db.insert(DatabaseHelper.TABLE_PRODUTOS, null, values);
@@ -32,6 +34,8 @@ public class ProdutoDAO {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.COLUMN_PRODUTO_NOME, produto.getNome());
         values.put(DatabaseHelper.COLUMN_PRODUTO_VALOR_PADRAO, produto.getValorPadrao());
+        values.put(DatabaseHelper.COLUMN_PRODUTO_PRECO_AQUISICAO, produto.getPrecoAquisicao());
+        values.put(DatabaseHelper.COLUMN_PRODUTO_PRECO_VENDA, produto.getPrecoVenda());
         values.put(DatabaseHelper.COLUMN_PRODUTO_DESCRICAO, produto.getDescricao());
         values.put(DatabaseHelper.COLUMN_PRODUTO_IMAGEM_URI, produto.getImagemUri());
         return db.update(DatabaseHelper.TABLE_PRODUTOS, values,
@@ -74,6 +78,21 @@ public class ProdutoDAO {
         p.setId(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PRODUTO_ID)));
         p.setNome(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PRODUTO_NOME)));
         p.setValorPadrao(cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PRODUTO_VALOR_PADRAO)));
+        
+        // Novos campos (podem não existir em versões antigas)
+        int precoAquisicaoIdx = cursor.getColumnIndex(DatabaseHelper.COLUMN_PRODUTO_PRECO_AQUISICAO);
+        if (precoAquisicaoIdx != -1) {
+            p.setPrecoAquisicao(cursor.getDouble(precoAquisicaoIdx));
+        }
+        
+        int precoVendaIdx = cursor.getColumnIndex(DatabaseHelper.COLUMN_PRODUTO_PRECO_VENDA);
+        if (precoVendaIdx != -1) {
+            p.setPrecoVenda(cursor.getDouble(precoVendaIdx));
+        } else {
+            // Se não existir, usar valorPadrao como fallback
+            p.setPrecoVenda(p.getValorPadrao());
+        }
+        
         p.setDescricao(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PRODUTO_DESCRICAO)));
         int imgIdx = cursor.getColumnIndex(DatabaseHelper.COLUMN_PRODUTO_IMAGEM_URI);
         if (imgIdx != -1) {

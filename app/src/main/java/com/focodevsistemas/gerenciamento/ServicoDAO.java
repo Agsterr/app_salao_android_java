@@ -60,6 +60,18 @@ public class ServicoDAO {
                 new String[]{String.valueOf(id)});
     }
 
+    public Servico getServicoById(long id) {
+        Cursor cursor = db.query(DatabaseHelper.TABLE_SERVICOS, null,
+                DatabaseHelper.COLUMN_SERVICO_ID + " = ?",
+                new String[]{String.valueOf(id)}, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            Servico servico = cursorToServico(cursor);
+            cursor.close();
+            return servico;
+        }
+        return null;
+    }
+
     private Servico cursorToServico(Cursor cursor) {
         Servico servico = new Servico();
         servico.setId(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_SERVICO_ID)));

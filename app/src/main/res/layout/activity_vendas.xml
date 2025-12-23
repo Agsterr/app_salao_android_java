@@ -41,26 +41,45 @@
             android:gravity="center" />
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Botão Nova Venda -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonNovaVenda"
-        android:layout_width="wrap_content"
+    <!-- Botões de Ação -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginBottom="16dp"
-        android:minHeight="56dp"
-        android:paddingVertical="14dp"
-        android:paddingHorizontal="16dp"
-        android:text="➕ Nova Venda"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textAllCaps="false"
-        app:icon="@android:drawable/ic_input_add"
-        app:iconGravity="textStart"
-        app:iconPadding="10dp"
-        app:iconSize="22dp"
-        app:cornerRadius="12dp"
-        style="@style/Widget.Material3.Button" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonExportarPDFVendas"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="📄 Exportar PDF"
+            android:textAllCaps="false"
+            app:icon="@android:drawable/ic_menu_upload"
+            app:iconGravity="textStart"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonNovaVenda"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:minHeight="56dp"
+            android:paddingVertical="14dp"
+            android:paddingHorizontal="16dp"
+            android:text="➕ Nova Venda"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            app:icon="@android:drawable/ic_input_add"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp"
+            app:iconSize="22dp"
+            app:cornerRadius="12dp"
+            style="@style/Widget.Material3.Button" />
+    </LinearLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"

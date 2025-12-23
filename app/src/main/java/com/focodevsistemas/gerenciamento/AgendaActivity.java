@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -51,6 +52,11 @@ public class AgendaActivity extends AppCompatActivity {
         });
 
         buttonTotais.setOnClickListener(v -> {
+            FeatureGate featureGate = new FeatureGate(this);
+            if (!featureGate.checkAccessAndBlock(this, "Relatórios", featureGate.canAccessReports())) {
+                // Acesso bloqueado - dialog já foi exibido
+                return;
+            }
             Intent intent = new Intent(this, AgendaTotaisActivity.class);
             startActivity(intent);
         });

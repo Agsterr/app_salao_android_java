@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".AlertasActivity">
+
+    <!-- Aviso Premium (para usuários FREE) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardAvisoPremium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#FFF3CD"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⭐ Funcionalidade Premium"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#856404"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Esta funcionalidade está disponível apenas no plano PREMIUM. Faça upgrade para desbloquear!"
+                android:textSize="14sp"
+                android:textColor="#856404" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Botão Criar Alerta -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonCriarAlerta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="➕ Criar Alerta"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_input_add"
+        app:iconGravity="textStart" />
+
+    <!-- Mensagem quando não há alertas -->
+    <TextView
+        android:id="@+id/textSemAlertas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="Nenhum alerta no momento."
+        android:textSize="18sp"
+        android:textStyle="italic"
+        android:padding="32dp"
+        android:visibility="gone" />
+
+    <!-- Lista de Alertas -->
+    <ListView
+        android:id="@+id/listViewAlertas"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="12dp"
+        android:padding="8dp" />
+
+</LinearLayout>
+

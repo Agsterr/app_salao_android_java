@@ -8,5 +8,7 @@
     <external-cache-path name="external_cache" path="." />
     <!-- Arquivos internos do app -->
     <files-path name="files" path="." />
+    <!-- Diretório de relatórios PDF -->
+    <external-files-path name="relatorios" path="Relatorios/" />
     <!-- REMOVIDO: external-path muito permissivo - não é necessário -->
 </paths>

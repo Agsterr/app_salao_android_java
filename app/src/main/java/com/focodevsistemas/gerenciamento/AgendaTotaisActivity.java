@@ -8,6 +8,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,6 +32,15 @@ public class AgendaTotaisActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Verificar acesso antes de abrir a Activity
+        FeatureGate featureGate = new FeatureGate(this);
+        if (!featureGate.checkAccessAndBlock(this, "Relatórios", featureGate.canAccessReports())) {
+            // Acesso bloqueado - dialog já foi exibido, fechar Activity
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_agenda_totais);
 
         setupActionBar();

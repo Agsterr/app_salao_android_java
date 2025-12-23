@@ -88,6 +88,18 @@ android {
             }
         }
     }
+    
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/*.kotlin_module'
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -133,6 +145,10 @@ dependencies {
     implementation libs.constraintlayout
     implementation 'com.android.billingclient:billing:8.0.0'
     implementation libs.work.runtime
+    // Biblioteca para gerar PDF (versão Android-compatível)
+    // Usando itextpdf que está disponível no Maven Central
+    // Versão estável e amplamente disponível
+    implementation 'com.itextpdf:itextpdf:5.5.12'
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

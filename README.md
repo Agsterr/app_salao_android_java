@@ -236,3 +236,4 @@ O app verifica automaticamente por atualizações quando configurado com um repo
 
 
 
+

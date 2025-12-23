@@ -196,26 +196,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private void autenticarComSucesso() {
         salvarOuLimparCredenciais();
-        
-        // Verifica assinatura antes de permitir acesso
-        SubscriptionChecker subscriptionChecker = SubscriptionChecker.getInstance(this);
-        subscriptionChecker.initialize();
-        
-        subscriptionChecker.checkSubscription(isSubscribed -> {
-            runOnUiThread(() -> {
-                if (isSubscribed) {
-                    // Assinatura ativa, permite acesso
-                    Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    // Sem assinatura, redireciona para tela de assinatura
-                    Intent intent = new Intent(LoginActivity.this, SubscriptionActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            });
-        });
+
+        Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void showIconAltOptions() {

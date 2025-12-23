@@ -169,6 +169,146 @@
                 app:cornerRadius="12dp"
                 style="@style/Widget.Material3.Button" />
         </LinearLayout>
+
+        <!-- Seção Premium -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:text="⭐ Funcionalidades Premium"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="?attr/colorPrimary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/header_button_spacing">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonRelatoriosServicos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="🔧 Relatórios Serviços"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_recent_history"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonRelatoriosProdutos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/header_button_spacing"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="📦 Relatórios Produtos"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_view"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/header_button_spacing">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonOrcamentos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="📋 Orçamentos"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_view"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonDashboard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/header_button_spacing"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="📈 Dashboard"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_view"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/header_button_spacing">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonAlertas"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="72dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="12dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="🔔 Alertas"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                app:icon="@android:drawable/ic_menu_info_details"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconSize="24dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

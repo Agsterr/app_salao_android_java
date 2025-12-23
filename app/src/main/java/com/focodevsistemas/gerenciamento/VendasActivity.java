@@ -12,6 +12,7 @@ import android.text.Editable;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.File;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -67,6 +68,20 @@ public class VendasActivity extends AppCompatActivity {
             android.content.Intent intent = new android.content.Intent(this, RegistrarVendaMultiplaActivity.class);
             startActivity(intent);
         });
+        
+        // Botão Exportar PDF de Vendas
+        Button buttonExportarPDF = findViewById(R.id.buttonExportarPDFVendas);
+        if (buttonExportarPDF != null) {
+            buttonExportarPDF.setOnClickListener(v -> exportarPDFVendas());
+            
+            // Configurar UI baseado no plano (premium ou free)
+            PlanManager planManager = PlanManager.getInstance(this);
+            boolean isPremium = planManager.isPremium();
+            if (!isPremium) {
+                buttonExportarPDF.setAlpha(0.5f);
+                buttonExportarPDF.setEnabled(true); // Mantém habilitado para mostrar o bloqueio
+            }
+        }
 
         // Pré-carregar filtro por cliente se vier da tela de recebimentos
         String nomeFiltroInicial = null;
@@ -239,6 +254,41 @@ public class VendasActivity extends AppCompatActivity {
             }
         }
         vendasAdapter.notifyDataSetChanged();
+    }
+
+    private void exportarPDFVendas() {
+        PlanManager planManager = PlanManager.getInstance(this);
+        if (!planManager.isPremium()) {
+            PremiumBlockDialog.show(this, "Exportar PDF de Vendas");
+            return;
+        }
+        
+        new Thread(() -> {
+            try {
+                List<Venda> vendas = vendaDAO.getAllVendas();
+                if (vendas.isEmpty()) {
+                    runOnUiThread(() -> {
+                        android.widget.Toast.makeText(this, "Nenhuma venda encontrada para exportar.", 
+                            android.widget.Toast.LENGTH_SHORT).show();
+                    });
+                    return;
+                }
+                
+                File pdfFile = PDFGeneratorHelper.gerarPDFVendas(this, vendas, vendaDAO, produtoDAO, clienteDAO, vendaItemDAO);
+                
+                runOnUiThread(() -> {
+                    android.widget.Toast.makeText(this, "PDF gerado com sucesso!\n" + pdfFile.getName(), 
+                        android.widget.Toast.LENGTH_LONG).show();
+                    PDFGeneratorHelper.compartilharPDF(this, pdfFile);
+                });
+            } catch (Exception e) {
+                android.util.Log.e("VendasActivity", "Erro ao gerar PDF", e);
+                runOnUiThread(() -> {
+                    android.widget.Toast.makeText(this, "Erro ao gerar PDF: " + e.getMessage(), 
+                        android.widget.Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 
     @Override

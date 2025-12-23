@@ -25,7 +25,38 @@ public class SubscriptionActivity extends AppCompatActivity implements
         buttonAssinar.setVisibility(View.GONE); // Mantém o botão oculto inicialmente
 
         buttonAssinar.setOnClickListener(v -> {
-            billingManager.queryAndLaunchBillingFlow(SubscriptionActivity.this, BuildConfig.SUBSCRIPTION_PRODUCT_ID);
+            // Usa SubscriptionService para ativar assinatura (que usa BillingManager internamente)
+            SubscriptionService subscriptionService = SubscriptionService.getInstance(this);
+            subscriptionService.activatePremiumSubscription(
+                SubscriptionActivity.this,
+                new SubscriptionService.SubscriptionListener() {
+                    @Override
+                    public void onSubscriptionActivated(String productId) {
+                        runOnUiThread(() -> {
+                            // Assinatura ativada, navega para tela principal
+                            Intent intent = new Intent(SubscriptionActivity.this, MenuActivity.class);
+                            startActivity(intent);
+                            finish();
+                        });
+                    }
+
+                    @Override
+                    public void onSubscriptionDeactivated() {
+                        // Não esperado aqui
+                    }
+
+                    @Override
+                    public void onSubscriptionError(String error) {
+                        runOnUiThread(() -> {
+                            android.widget.Toast.makeText(
+                                SubscriptionActivity.this,
+                                "Erro ao ativar assinatura: " + error,
+                                android.widget.Toast.LENGTH_LONG
+                            ).show();
+                        });
+                    }
+                }
+            );
         });
 
         // Inicializa o BillingManager, passando a Activity como ouvinte de prontidão

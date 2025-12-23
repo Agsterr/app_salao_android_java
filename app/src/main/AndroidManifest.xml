@@ -26,7 +26,8 @@
             android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
-            android:roundIcon="@mipmap/ic_launcher_round">
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -38,7 +39,8 @@
             android:targetActivity=".LoginActivity"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_alt">
+            android:icon="@mipmap/ic_launcher_alt"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -123,5 +125,29 @@
             android:name=".ServicoListActivity"
             android:parentActivityName=".MenuActivity"
             android:label="Serviços" />
+        <activity
+            android:name=".RelatoriosActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Relatórios" />
+        <activity
+            android:name=".RelatoriosServicosActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Relatórios de Serviços" />
+        <activity
+            android:name=".RelatoriosProdutosActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Relatórios de Produtos" />
+        <activity
+            android:name=".OrcamentosActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Orçamentos" />
+        <activity
+            android:name=".DashboardActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Dashboard" />
+        <activity
+            android:name=".AlertasActivity"
+            android:parentActivityName=".MenuActivity"
+            android:label="Alertas" />
 </application>
 </manifest>

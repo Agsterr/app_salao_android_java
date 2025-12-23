@@ -87,6 +87,20 @@ public class ProdutoActivity extends AppCompatActivity {
             Intent intent = new Intent(ProdutoActivity.this, VendasActivity.class);
             startActivity(intent);
         });
+        
+        // Botão Exportar PDF de Produtos
+        Button buttonExportarPDF = findViewById(R.id.buttonExportarPDFProdutos);
+        if (buttonExportarPDF != null) {
+            buttonExportarPDF.setOnClickListener(v -> exportarPDFProdutos());
+            
+            // Configurar UI baseado no plano (premium ou free)
+            PlanManager planManager = PlanManager.getInstance(this);
+            boolean isPremium = planManager.isPremium();
+            if (!isPremium) {
+                buttonExportarPDF.setAlpha(0.5f);
+                buttonExportarPDF.setEnabled(true); // Mantém habilitado para mostrar o bloqueio
+            }
+        }
         if (fabAdicionarProduto != null) {
             fabAdicionarProduto.setOnClickListener(v -> mostrarDialogProduto(null));
         }
@@ -159,6 +173,38 @@ public class ProdutoActivity extends AppCompatActivity {
         });
 
         ViewCompat.requestApplyInsets(root);
+    }
+
+    private void exportarPDFProdutos() {
+        PlanManager planManager = PlanManager.getInstance(this);
+        if (!planManager.isPremium()) {
+            PremiumBlockDialog.show(this, "Exportar PDF de Produtos");
+            return;
+        }
+        
+        new Thread(() -> {
+            try {
+                List<Produto> produtos = produtoDAO.getAllProdutos();
+                if (produtos.isEmpty()) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Nenhum produto encontrado para exportar.", Toast.LENGTH_SHORT).show();
+                    });
+                    return;
+                }
+                
+                File pdfFile = PDFGeneratorHelper.gerarPDFProdutos(this, produtos);
+                
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "PDF gerado com sucesso!\n" + pdfFile.getName(), Toast.LENGTH_LONG).show();
+                    PDFGeneratorHelper.compartilharPDF(this, pdfFile);
+                });
+            } catch (Exception e) {
+                android.util.Log.e("ProdutoActivity", "Erro ao gerar PDF", e);
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Erro ao gerar PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 
     @Override
@@ -256,6 +302,8 @@ public class ProdutoActivity extends AppCompatActivity {
         builder.setTitle(produtoExistente == null ? "Novo Produto" : "Editar Produto");
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_produto, null);
         EditText editTextNome = dialogView.findViewById(R.id.editTextNomeProduto);
+        EditText editTextPrecoAquisicao = dialogView.findViewById(R.id.editTextPrecoAquisicao);
+        EditText editTextPrecoVenda = dialogView.findViewById(R.id.editTextPrecoVenda);
         EditText editTextValor = dialogView.findViewById(R.id.editTextValorProduto);
         EditText editTextDescricao = dialogView.findViewById(R.id.editTextDescricaoProduto);
         ImageView imageViewFoto = dialogView.findViewById(R.id.imageViewProdutoFoto);
@@ -266,6 +314,8 @@ public class ProdutoActivity extends AppCompatActivity {
 
         if (produtoExistente != null) {
             editTextNome.setText(produtoExistente.getNome());
+            editTextPrecoAquisicao.setText(produtoExistente.getPrecoAquisicao() > 0 ? String.valueOf(produtoExistente.getPrecoAquisicao()) : "");
+            editTextPrecoVenda.setText(produtoExistente.getPrecoVenda() > 0 ? String.valueOf(produtoExistente.getPrecoVenda()) : "");
             editTextValor.setText(String.valueOf(produtoExistente.getValorPadrao()));
             editTextDescricao.setText(produtoExistente.getDescricao());
             if (produtoExistente.getImagemUri() != null) {
@@ -303,26 +353,53 @@ public class ProdutoActivity extends AppCompatActivity {
             android.widget.Button positiveButton = alertDialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(v -> {
                 String nome = editTextNome.getText().toString().trim();
+                String precoAquisicaoStr = editTextPrecoAquisicao.getText().toString().trim();
+                String precoVendaStr = editTextPrecoVenda.getText().toString().trim();
                 String valorStr = editTextValor.getText().toString().trim();
                 String descricao = editTextDescricao.getText().toString().trim();
+                
                 if (nome.isEmpty()) {
                     Toast.makeText(this, "Informe o nome do produto", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (valorStr.isEmpty()) {
-                    Toast.makeText(this, "Informe o valor", Toast.LENGTH_SHORT).show();
+                
+                if (precoVendaStr.isEmpty()) {
+                    Toast.makeText(this, "Informe o preço de venda", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                double valor;
+                
+                double precoAquisicao = 0.0;
+                if (!precoAquisicaoStr.isEmpty()) {
+                    try {
+                        precoAquisicao = Double.parseDouble(precoAquisicaoStr.replace(",", "."));
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(this, "Preço de aquisição inválido", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+                
+                double precoVenda;
                 try {
-                    valor = Double.parseDouble(valorStr);
+                    precoVenda = Double.parseDouble(precoVendaStr.replace(",", "."));
                 } catch (NumberFormatException e) {
-                    Toast.makeText(this, "Valor inválido", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Preço de venda inválido", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                
+                double valor = precoVenda; // Usar preço de venda como valor padrão
+                if (!valorStr.isEmpty()) {
+                    try {
+                        valor = Double.parseDouble(valorStr.replace(",", "."));
+                    } catch (NumberFormatException e) {
+                        // Ignorar, usar precoVenda
+                    }
+                }
+                
                 if (produtoExistente == null) {
                     Produto novo = new Produto();
                     novo.setNome(nome);
+                    novo.setPrecoAquisicao(precoAquisicao);
+                    novo.setPrecoVenda(precoVenda);
                     novo.setValorPadrao(valor);
                     novo.setDescricao(descricao);
                     novo.setImagemUri(fotoUriSelecionada != null ? fotoUriSelecionada.toString() : null);
@@ -330,6 +407,8 @@ public class ProdutoActivity extends AppCompatActivity {
                     Toast.makeText(this, "Produto salvo (ID: " + id + ")", Toast.LENGTH_SHORT).show();
                 } else {
                     produtoExistente.setNome(nome);
+                    produtoExistente.setPrecoAquisicao(precoAquisicao);
+                    produtoExistente.setPrecoVenda(precoVenda);
                     produtoExistente.setValorPadrao(valor);
                     produtoExistente.setDescricao(descricao);
                     produtoExistente.setImagemUri(fotoUriSelecionada != null ? fotoUriSelecionada.toString() : null);
@@ -450,3 +529,4 @@ public class ProdutoActivity extends AppCompatActivity {
         }
     }
 }
+

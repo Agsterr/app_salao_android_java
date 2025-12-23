@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,19 +16,14 @@ public class MenuActivity extends AppCompatActivity {
     private Button buttonVerAgenda;
     private Button buttonGerenciarProdutos;
     private Button buttonBackup;
-    private SubscriptionChecker subscriptionChecker;
+    private PremiumBlockDialog currentDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
         setContentView(R.layout.activity_cliente);
-        
-        // Inicializa verificação de assinatura
-        subscriptionChecker = SubscriptionChecker.getInstance(this);
-        subscriptionChecker.initialize();
-        
-        // Verifica assinatura periodicamente (a cada vez que a tela é exibida)
-        verificarAssinatura();
+
         // Solicitar permissão de notificações no Android 13+
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
@@ -98,33 +92,126 @@ public class MenuActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // Botão Relatórios Serviços Premium
+        Button buttonRelatoriosServicos = findViewById(R.id.buttonRelatoriosServicos);
+        if (buttonRelatoriosServicos != null) {
+            buttonRelatoriosServicos.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
+                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Relatórios de Serviços", featureGate.canAccessReports())) {
+                        // Acesso bloqueado - dialog já foi exibido
+                        return;
+                    }
+                    Intent intent = new Intent(MenuActivity.this, RelatoriosServicosActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+
+        // Botão Relatórios Produtos Premium
+        Button buttonRelatoriosProdutos = findViewById(R.id.buttonRelatoriosProdutos);
+        if (buttonRelatoriosProdutos != null) {
+            buttonRelatoriosProdutos.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
+                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Relatórios de Produtos", featureGate.canAccessReports())) {
+                        // Acesso bloqueado - dialog já foi exibido
+                        return;
+                    }
+                    Intent intent = new Intent(MenuActivity.this, RelatoriosProdutosActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+
+        // Botão Dashboard Premium
+        Button buttonDashboard = findViewById(R.id.buttonDashboard);
+        if (buttonDashboard != null) {
+            buttonDashboard.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
+                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Dashboard", featureGate.canAccessDashboard())) {
+                        // Acesso bloqueado - dialog já foi exibido
+                        return;
+                    }
+                    Intent intent = new Intent(MenuActivity.this, DashboardActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+
+        // Botão Orçamentos Premium
+        Button buttonOrcamentos = findViewById(R.id.buttonOrcamentos);
+        if (buttonOrcamentos != null) {
+            buttonOrcamentos.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
+                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Orçamentos", featureGate.canAccessReports())) {
+                        // Acesso bloqueado - dialog já foi exibido
+                        return;
+                    }
+                    Intent intent = new Intent(MenuActivity.this, OrcamentosActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+
+        // Botão Alertas Premium
+        Button buttonAlertas = findViewById(R.id.buttonAlertas);
+        if (buttonAlertas != null) {
+            buttonAlertas.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
+                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Alertas", featureGate.canAccessAlerts())) {
+                        // Acesso bloqueado - dialog já foi exibido
+                        return;
+                    }
+                    Intent intent = new Intent(MenuActivity.this, AlertasActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
     }
     
     @Override
-    protected void onResume() {
-        super.onResume();
-        // Verifica assinatura sempre que a tela volta ao foco
-        verificarAssinatura();
+    protected void onPause() {
+        super.onPause();
+        // Não fechar dialog no onPause - deixar o usuário interagir
     }
     
-    /**
-     * Verifica se a assinatura ainda está ativa
-     * Se não estiver, redireciona para tela de assinatura
-     */
-    private void verificarAssinatura() {
-        subscriptionChecker.checkSubscription(isSubscribed -> {
-            runOnUiThread(() -> {
-                if (!isSubscribed) {
-                    // Assinatura expirou ou foi cancelada
-                    Toast.makeText(this, "Sua assinatura expirou. Renove para continuar usando o app.", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(MenuActivity.this, SubscriptionActivity.class);
-                    startActivity(intent);
-                    finish();
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Fechar dialog quando a Activity for parada (mas não destruída ainda)
+        // Isso previne WindowLeaked
+        if (currentDialog != null && currentDialog.isShowing()) {
+            currentDialog.dismiss();
+            currentDialog = null;
+        }
+    }
+    
+    @Override
+    protected void onDestroy() {
+        // Garantir que qualquer dialog seja fechado quando a Activity for destruída
+        if (currentDialog != null) {
+            try {
+                if (currentDialog.isShowing()) {
+                    currentDialog.dismiss();
                 }
-            });
-        });
+            } catch (Exception e) {
+                // Ignorar erros durante destruição
+            } finally {
+                currentDialog = null;
+            }
+        }
+        super.onDestroy();
     }
 }
-
 
 

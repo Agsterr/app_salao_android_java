@@ -46,8 +46,16 @@ public class BillingManager {
         PurchasesUpdatedListener purchasesUpdatedListener = (billingResult, purchases) -> {
             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
                 for (Purchase purchase : purchases) {
-                    // TODO: Processar a compra: validar no backend e conceder o acesso
+                    // Processar a compra: notificar SubscriptionService
                     Log.d(TAG, "Compra bem-sucedida: " + purchase.getOrderId());
+                    
+                    // Notificar SubscriptionService sobre a compra concluída
+                    try {
+                        SubscriptionService subscriptionService = SubscriptionService.getInstance(context);
+                        subscriptionService.onPurchaseCompleted(purchase);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Erro ao notificar SubscriptionService sobre compra", e);
+                    }
                 }
             } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
                 Log.d(TAG, "Usuário cancelou a compra.");
@@ -92,6 +100,15 @@ public class BillingManager {
                 startConnection();
             }
         });
+    }
+
+    /**
+     * Verifica se o BillingClient está pronto para uso.
+     * 
+     * @return true se está pronto, false caso contrário
+     */
+    public boolean isReady() {
+        return billingClient.isReady();
     }
 
     public void verificarAssinaturaAtiva(SubscriptionVerificationListener listener) {

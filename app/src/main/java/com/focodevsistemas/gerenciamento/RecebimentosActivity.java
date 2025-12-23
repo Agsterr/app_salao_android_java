@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.File;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -73,6 +74,20 @@ public class RecebimentosActivity extends AppCompatActivity {
         });
 
         buttonVoltarRecebimentos.setOnClickListener(v -> finish());
+        
+        // Botão Exportar PDF de Recebimentos
+        Button buttonExportarPDF = findViewById(R.id.buttonExportarPDFRecebimentos);
+        if (buttonExportarPDF != null) {
+            buttonExportarPDF.setOnClickListener(v -> exportarPDFRecebimentos());
+            
+            // Configurar UI baseado no plano (premium ou free)
+            PlanManager planManager = PlanManager.getInstance(this);
+            boolean isPremium = planManager.isPremium();
+            if (!isPremium) {
+                buttonExportarPDF.setAlpha(0.5f);
+                buttonExportarPDF.setEnabled(true); // Mantém habilitado para mostrar o bloqueio
+            }
+        }
 
         registerForContextMenu(listViewRecebimentos);
 
@@ -90,6 +105,41 @@ public class RecebimentosActivity extends AppCompatActivity {
         });
 
         atualizarListaRecebimentos();
+    }
+
+    private void exportarPDFRecebimentos() {
+        PlanManager planManager = PlanManager.getInstance(this);
+        if (!planManager.isPremium()) {
+            PremiumBlockDialog.show(this, "Exportar PDF de Recebimentos");
+            return;
+        }
+        
+        new Thread(() -> {
+            try {
+                List<Recebimento> recebimentos = recebimentoDAO.getPorStatus(listaAtualStatus);
+                if (recebimentos.isEmpty()) {
+                    runOnUiThread(() -> {
+                        String mensagem = (listaAtualStatus == RecebimentoDAO.STATUS_A_RECEBER) ?
+                            "Nenhum valor a receber encontrado para exportar." :
+                            "Nenhum valor recebido encontrado para exportar.";
+                        Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show();
+                    });
+                    return;
+                }
+                
+                File pdfFile = PDFGeneratorHelper.gerarPDFRecebimentos(this, recebimentos, listaAtualStatus, vendaDAO, clienteDAO);
+                
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "PDF gerado com sucesso!\n" + pdfFile.getName(), Toast.LENGTH_LONG).show();
+                    PDFGeneratorHelper.compartilharPDF(this, pdfFile);
+                });
+            } catch (Exception e) {
+                android.util.Log.e("RecebimentosActivity", "Erro ao gerar PDF", e);
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Erro ao gerar PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 
     @Override
