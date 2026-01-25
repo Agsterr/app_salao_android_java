@@ -187,3 +187,4 @@ Ver arquivo `SubscriptionServiceExample.java` para exemplos completos de:
 - Verificação de funcionalidades
 - Uso em Activities
 
+

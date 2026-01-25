@@ -40,6 +40,9 @@ public class RecebimentosActivity extends AppCompatActivity {
     private java.util.Map<Long, Boolean> gruposExpandidos = new java.util.HashMap<>();
     private java.util.List<Object> linhasRenderizadas = new java.util.ArrayList<>();
 
+    private VendaItemDAO vendaItemDAO;
+    private ProdutoDAO produtoDAO;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +59,10 @@ public class RecebimentosActivity extends AppCompatActivity {
         clienteDAO.open();
         vendaDAO = new VendaDAO(this);
         vendaDAO.open();
+        vendaItemDAO = new VendaItemDAO(this);
+        vendaItemDAO.open();
+        produtoDAO = new ProdutoDAO(this);
+        produtoDAO.open();
 
         buttonVerAReceber = findViewById(R.id.buttonVerAReceber);
         buttonVerPagos = findViewById(R.id.buttonVerPagos);
@@ -127,7 +134,7 @@ public class RecebimentosActivity extends AppCompatActivity {
                     return;
                 }
                 
-                File pdfFile = PDFGeneratorHelper.gerarPDFRecebimentos(this, recebimentos, listaAtualStatus, vendaDAO, clienteDAO);
+                File pdfFile = PDFGeneratorHelper.gerarPDFRecebimentos(this, recebimentos, listaAtualStatus, vendaDAO, clienteDAO, vendaItemDAO, produtoDAO);
                 
                 runOnUiThread(() -> {
                     Toast.makeText(this, "PDF gerado com sucesso!\n" + pdfFile.getName(), Toast.LENGTH_LONG).show();
@@ -147,6 +154,8 @@ public class RecebimentosActivity extends AppCompatActivity {
         recebimentoDAO.close();
         if (clienteDAO != null) clienteDAO.close();
         if (vendaDAO != null) vendaDAO.close();
+        if (vendaItemDAO != null) vendaItemDAO.close();
+        if (produtoDAO != null) produtoDAO.close();
         super.onDestroy();
     }
 

@@ -23,7 +23,7 @@ public class SubscriptionService {
     private static final String KEY_IS_SIMULATED = "is_simulated";
 
     // ID do produto de assinatura mensal (deve corresponder ao configurado no Google Play Console)
-    private static final String MONTHLY_SUBSCRIPTION_PRODUCT_ID = "premium_monthly";
+    private static final String MONTHLY_SUBSCRIPTION_PRODUCT_ID = BillingConfig.PRODUCT_ID_MONTHLY;
 
     private static volatile SubscriptionService instance;
     private final Context appContext;
@@ -59,6 +59,19 @@ public class SubscriptionService {
         this.appContext = context.getApplicationContext();
         this.sharedPreferences = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         this.planManager = PlanManager.getInstance(context);
+
+        // Limpeza de segurança: Se estiver em produção e detectar assinatura simulada,
+        // limpa imediatamente antes de sincronizar.
+        if (!com.focodevsistemas.gerenciamento.BuildConfig.DEBUG && 
+            sharedPreferences.getBoolean(KEY_IS_SIMULATED, false)) {
+            Log.w(TAG, "Limpeza preventiva de assinatura simulada em ambiente de produção");
+            sharedPreferences.edit()
+                    .putBoolean(KEY_SUBSCRIPTION_ACTIVE, false)
+                    .putBoolean(KEY_IS_SIMULATED, false)
+                    .remove(KEY_SUBSCRIPTION_PRODUCT_ID)
+                    .remove(KEY_SUBSCRIPTION_EXPIRY)
+                    .apply();
+        }
         
         // Sincroniza o plano atual com o status da assinatura
         syncPlanWithSubscription();
@@ -362,15 +375,28 @@ public class SubscriptionService {
             } else {
                 // Sem assinatura real - verifica se há simulada
                 Log.d(TAG, "Nenhuma assinatura real ativa");
-                if (isSimulatedSubscription() && isSubscriptionActive()) {
-                    // Mantém assinatura simulada se ainda estiver ativa
-                    Log.d(TAG, "Mantendo assinatura simulada ativa");
+                
+                // Correção de segurança: Em produção, IGNORA assinatura simulada.
+                // Só permite assinatura simulada se estiver em modo DEBUG.
+                boolean allowSimulated = com.focodevsistemas.gerenciamento.BuildConfig.DEBUG && 
+                                         isSimulatedSubscription() && 
+                                         isSubscriptionActive();
+                
+                if (allowSimulated) {
+                    // Mantém assinatura simulada se ainda estiver ativa E estivermos em DEBUG
+                    Log.d(TAG, "Mantendo assinatura simulada ativa (Modo DEBUG)");
                 } else {
-                    // Não há assinatura real nem simulada válida - volta para FREE
+                    // Não há assinatura real, ou a simulada não é permitida em produção - volta para FREE
+                    if (!com.focodevsistemas.gerenciamento.BuildConfig.DEBUG && isSimulatedSubscription()) {
+                        Log.w(TAG, "Assinatura simulada ignorada em produção. Forçando plano FREE.");
+                    }
+                    
                     planManager.setCurrentPlan(PlanType.FREE);
                     sharedPreferences.edit()
                             .putBoolean(KEY_SUBSCRIPTION_ACTIVE, false)
                             .putBoolean(KEY_IS_SIMULATED, false)
+                            .remove(KEY_SUBSCRIPTION_PRODUCT_ID)
+                            .remove(KEY_SUBSCRIPTION_EXPIRY)
                             .apply();
                 }
             }

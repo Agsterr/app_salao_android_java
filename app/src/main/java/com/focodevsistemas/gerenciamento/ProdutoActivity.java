@@ -52,6 +52,7 @@ public class ProdutoActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<Uri> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
+    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
     private Uri fotoUriTemp;
     private Uri fotoUriSelecionada;
     private ImageView dialogImageViewFoto;
@@ -130,6 +131,14 @@ public class ProdutoActivity extends AppCompatActivity {
                 if (dialogImageViewFoto != null) {
                     dialogImageViewFoto.setImageURI(uri);
                 }
+            }
+        });
+        
+        requestCameraPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                abrirCamera();
+            } else {
+                Toast.makeText(this, "Permissão de câmera necessária para tirar fotos", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -297,6 +306,19 @@ public class ProdutoActivity extends AppCompatActivity {
         }
     }
 
+    private void abrirCamera() {
+        Uri uri = createImageUri();
+        if (uri != null) {
+            fotoUriTemp = uri;
+            try {
+                cameraLauncher.launch(uri);
+            } catch (Exception e) {
+                Toast.makeText(this, "Erro ao abrir câmera: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                android.util.Log.e("ProdutoActivity", "Erro ao lançar câmera", e);
+            }
+        }
+    }
+
     private void mostrarDialogProduto(final Produto produtoExistente) {
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
         builder.setTitle(produtoExistente == null ? "Novo Produto" : "Editar Produto");
@@ -329,10 +351,10 @@ public class ProdutoActivity extends AppCompatActivity {
         }
 
         buttonTirarFoto.setOnClickListener(v -> {
-            Uri uri = createImageUri();
-            if (uri != null) {
-                fotoUriTemp = uri;
-                cameraLauncher.launch(uri);
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                abrirCamera();
+            } else {
+                requestCameraPermissionLauncher.launch(android.Manifest.permission.CAMERA);
             }
         });
         buttonSelecionarGaleria.setOnClickListener(v -> {

@@ -35,12 +35,17 @@ public class AlertasActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Proteção Premium
+        if (!PremiumManager.getInstance(this).verificarAcessoEmActivity(this, "Alertas")) {
+            return;
+        }
+        
         setContentView(R.layout.activity_alertas);
         
         setupActionBar();
         setupDAO();
         bindViews();
-        setupPremiumUI();
+        // setupPremiumUI removido
         setupListeners();
         carregarAlertas();
     }

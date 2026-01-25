@@ -38,12 +38,17 @@ public class DashboardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Proteção de segurança: Verifica se usuário é Premium
+        if (!PremiumManager.getInstance(this).verificarAcessoEmActivity(this, "Dashboard")) {
+            return; // Interrompe inicialização se não for Premium
+        }
+        
         setContentView(R.layout.activity_dashboard);
         
         setupActionBar();
         setupDAOs();
         bindViews();
-        setupPremiumUI();
+        // setupPremiumUI removido pois a verificação agora é bloqueante no início
         atualizarDashboard();
     }
     

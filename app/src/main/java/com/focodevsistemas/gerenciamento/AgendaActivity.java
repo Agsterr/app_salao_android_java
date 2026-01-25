@@ -53,8 +53,8 @@ public class AgendaActivity extends AppCompatActivity {
 
         buttonTotais.setOnClickListener(v -> {
             FeatureGate featureGate = new FeatureGate(this);
-            if (!featureGate.checkAccessAndBlock(this, "Relatórios", featureGate.canAccessReports())) {
-                // Acesso bloqueado - dialog já foi exibido
+            if (!featureGate.canAccessReports()) {
+                Toast.makeText(this, "Recurso disponível apenas no plano PREMIUM.", Toast.LENGTH_SHORT).show();
                 return;
             }
             Intent intent = new Intent(this, AgendaTotaisActivity.class);

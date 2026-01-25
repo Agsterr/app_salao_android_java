@@ -134,12 +134,8 @@ public class PremiumBlockDialog {
         upgradeParams.setMargins(0, 0, 8, 0);
         upgradeButton.setLayoutParams(upgradeParams);
         upgradeButton.setOnClickListener(v -> {
-            if (dialog != null && dialog.isShowing()) {
-                dialog.dismiss();
-            }
-            if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
-                openSubscriptionActivity();
-            }
+            // Inicia fluxo de assinatura diretamente
+            startSubscriptionFlow();
         });
         buttonContainer.addView(upgradeButton);
         
@@ -152,8 +148,7 @@ public class PremiumBlockDialog {
         cancelButton.setLayoutParams(cancelParams);
         cancelButton.setOnClickListener(v -> {
             dismissDialog();
-            // Fechar Activity quando cancelar (para Activities que devem ser fechadas)
-            closeActivityIfNeeded();
+            // NÃO fecha a Activity atual (MenuActivity), apenas o dialog
         });
         buttonContainer.addView(cancelButton);
         
@@ -199,20 +194,47 @@ public class PremiumBlockDialog {
     }
     
     /**
-     * Abre a Activity de assinatura para upgrade.
+     * Inicia o fluxo de assinatura diretamente.
      */
-    private void openSubscriptionActivity() {
-        dismissDialog();
-        if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
-            try {
-                Intent intent = new Intent(activity, SubscriptionActivity.class);
-                activity.startActivity(intent);
-                // Fechar Activity atual após abrir SubscriptionActivity
-                closeActivityIfNeeded();
-            } catch (Exception e) {
-                android.util.Log.e("PremiumBlockDialog", "Erro ao abrir SubscriptionActivity", e);
-            }
+    private void startSubscriptionFlow() {
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+            return;
         }
+
+        // Fecha o dialog atual para não sobrepor o fluxo de compra
+        dismissDialog();
+
+        // Usa o SubscriptionService para iniciar a compra
+        SubscriptionService.getInstance(activity).activatePremiumSubscription(
+            activity,
+            new SubscriptionService.SubscriptionListener() {
+                @Override
+                public void onSubscriptionActivated(String productId) {
+                    activity.runOnUiThread(() -> {
+                        android.widget.Toast.makeText(activity, 
+                            "Assinatura Premium ativada com sucesso!", 
+                            android.widget.Toast.LENGTH_LONG).show();
+                        
+                        // Recarrega a Activity se necessário para atualizar UI
+                        // Se for MenuActivity, o onResume já cuidará disso
+                    });
+                }
+
+                @Override
+                public void onSubscriptionDeactivated() {
+                    // Não relevante aqui
+                }
+
+                @Override
+                public void onSubscriptionError(String error) {
+                    activity.runOnUiThread(() -> {
+                        android.widget.Toast.makeText(activity, 
+                            "Erro ao iniciar assinatura: " + error, 
+                            android.widget.Toast.LENGTH_LONG).show();
+                    });
+                }
+            }
+        );
     }
 
     /**

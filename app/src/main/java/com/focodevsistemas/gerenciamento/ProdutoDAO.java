@@ -73,6 +73,21 @@ public class ProdutoDAO {
         return null;
     }
 
+    public int getTotalProdutos() {
+        int total = 0;
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + DatabaseHelper.TABLE_PRODUTOS, null);
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst() && !cursor.isNull(0)) {
+                    total = cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return total;
+    }
+
     private Produto cursorToProduto(Cursor cursor) {
         Produto p = new Produto();
         p.setId(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PRODUTO_ID)));

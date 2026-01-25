@@ -14,6 +14,8 @@ public class Orcamento {
     private String tipo; // "SERVICO" ou "PRODUTO"
     private long dataCriacao; // timestamp
     private double valorTotal;
+    private double desconto;
+    private double acrescimo;
     private String observacoes;
     private int status; // 0 = Pendente, 1 = Aprovado, 2 = Rejeitado
     
@@ -45,6 +47,12 @@ public class Orcamento {
     public double getValorTotal() { return valorTotal; }
     public void setValorTotal(double valorTotal) { this.valorTotal = valorTotal; }
     
+    public double getDesconto() { return desconto; }
+    public void setDesconto(double desconto) { this.desconto = desconto; }
+
+    public double getAcrescimo() { return acrescimo; }
+    public void setAcrescimo(double acrescimo) { this.acrescimo = acrescimo; }
+
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
     
@@ -109,4 +117,5 @@ public class Orcamento {
         public void setValorTotal(double valorTotal) { this.valorTotal = valorTotal; }
     }
 }
+
 

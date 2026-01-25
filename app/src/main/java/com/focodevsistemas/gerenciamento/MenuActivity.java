@@ -16,6 +16,7 @@ public class MenuActivity extends AppCompatActivity {
     private Button buttonVerAgenda;
     private Button buttonGerenciarProdutos;
     private Button buttonBackup;
+    private Button buttonAssinarPremium;
     private PremiumBlockDialog currentDialog;
 
     @Override
@@ -33,11 +34,20 @@ public class MenuActivity extends AppCompatActivity {
             }
         }
 
+        // Inicializa o sistema de assinatura e verifica status
+        SubscriptionService.getInstance(this).initialize(() -> {
+            // Callback opcional quando o BillingClient estiver pronto
+            // A verificação de assinatura acontece automaticamente dentro do initialize
+        });
+
         buttonSalvar = findViewById(R.id.buttonSalvar);
         buttonGerenciarServicos = findViewById(R.id.buttonGerenciarServicos);
         buttonVerAgenda = findViewById(R.id.buttonVerAgenda);
         buttonGerenciarProdutos = findViewById(R.id.buttonGerenciarProdutos);
         buttonBackup = findViewById(R.id.buttonBackup);
+        buttonAssinarPremium = findViewById(R.id.buttonAssinarPremium);
+        
+        setupAssinaturaButton();
 
         // Botão Agenda Pessoal - abre Activity separada
         Button buttonAgendaPessoal = findViewById(R.id.buttonAgendaPessoal);
@@ -96,86 +106,109 @@ public class MenuActivity extends AppCompatActivity {
         // Botão Relatórios Serviços Premium
         Button buttonRelatoriosServicos = findViewById(R.id.buttonRelatoriosServicos);
         if (buttonRelatoriosServicos != null) {
-            buttonRelatoriosServicos.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
-                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Relatórios de Serviços", featureGate.canAccessReports())) {
-                        // Acesso bloqueado - dialog já foi exibido
-                        return;
-                    }
+            buttonRelatoriosServicos.setOnClickListener(v -> {
+                PremiumManager.getInstance(this).executarAcaoPremium(this, "Relatórios de Serviços", () -> {
                     Intent intent = new Intent(MenuActivity.this, RelatoriosServicosActivity.class);
                     startActivity(intent);
-                }
+                });
             });
         }
 
         // Botão Relatórios Produtos Premium
         Button buttonRelatoriosProdutos = findViewById(R.id.buttonRelatoriosProdutos);
         if (buttonRelatoriosProdutos != null) {
-            buttonRelatoriosProdutos.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
-                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Relatórios de Produtos", featureGate.canAccessReports())) {
-                        // Acesso bloqueado - dialog já foi exibido
-                        return;
-                    }
+            buttonRelatoriosProdutos.setOnClickListener(v -> {
+                PremiumManager.getInstance(this).executarAcaoPremium(this, "Relatórios de Produtos", () -> {
                     Intent intent = new Intent(MenuActivity.this, RelatoriosProdutosActivity.class);
                     startActivity(intent);
-                }
+                });
             });
         }
 
         // Botão Dashboard Premium
         Button buttonDashboard = findViewById(R.id.buttonDashboard);
         if (buttonDashboard != null) {
-            buttonDashboard.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
-                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Dashboard", featureGate.canAccessDashboard())) {
-                        // Acesso bloqueado - dialog já foi exibido
-                        return;
-                    }
+            buttonDashboard.setOnClickListener(v -> {
+                PremiumManager.getInstance(this).executarAcaoPremium(this, "Dashboard", () -> {
                     Intent intent = new Intent(MenuActivity.this, DashboardActivity.class);
                     startActivity(intent);
-                }
+                });
             });
         }
 
         // Botão Orçamentos Premium
         Button buttonOrcamentos = findViewById(R.id.buttonOrcamentos);
         if (buttonOrcamentos != null) {
-            buttonOrcamentos.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
-                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Orçamentos", featureGate.canAccessReports())) {
-                        // Acesso bloqueado - dialog já foi exibido
-                        return;
-                    }
+            buttonOrcamentos.setOnClickListener(v -> {
+                PremiumManager.getInstance(this).executarAcaoPremium(this, "Orçamentos", () -> {
                     Intent intent = new Intent(MenuActivity.this, OrcamentosActivity.class);
                     startActivity(intent);
-                }
+                });
             });
         }
 
         // Botão Alertas Premium
         Button buttonAlertas = findViewById(R.id.buttonAlertas);
         if (buttonAlertas != null) {
-            buttonAlertas.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FeatureGate featureGate = new FeatureGate(MenuActivity.this);
-                    if (!featureGate.checkAccessAndBlock(MenuActivity.this, "Alertas", featureGate.canAccessAlerts())) {
-                        // Acesso bloqueado - dialog já foi exibido
-                        return;
-                    }
+            buttonAlertas.setOnClickListener(v -> {
+                PremiumManager.getInstance(this).executarAcaoPremium(this, "Alertas", () -> {
                     Intent intent = new Intent(MenuActivity.this, AlertasActivity.class);
                     startActivity(intent);
+                });
+            });
+        }
+    }
+    
+    private void setupAssinaturaButton() {
+        if (buttonAssinarPremium == null) return;
+
+        // Configura o clique do botão
+        buttonAssinarPremium.setOnClickListener(v -> {
+            SubscriptionService.getInstance(this).activatePremiumSubscription(this, new SubscriptionService.SubscriptionListener() {
+                @Override
+                public void onSubscriptionActivated(String productId) {
+                    runOnUiThread(() -> {
+                        android.widget.Toast.makeText(MenuActivity.this, 
+                            "Assinatura Premium ativada com sucesso! Aproveite.", 
+                            android.widget.Toast.LENGTH_LONG).show();
+                        updatePremiumUI(true);
+                    });
+                }
+
+                @Override
+                public void onSubscriptionDeactivated() {
+                    runOnUiThread(() -> updatePremiumUI(false));
+                }
+
+                @Override
+                public void onSubscriptionError(String error) {
+                    runOnUiThread(() -> 
+                        android.widget.Toast.makeText(MenuActivity.this, 
+                            "Erro na assinatura: " + error, 
+                            android.widget.Toast.LENGTH_LONG).show()
+                    );
                 }
             });
+        });
+
+        // Define estado inicial
+        updatePremiumUI(SubscriptionService.getInstance(this).isSubscriptionActive());
+    }
+
+    private void updatePremiumUI(boolean isPremium) {
+        if (buttonAssinarPremium != null) {
+            buttonAssinarPremium.setVisibility(isPremium ? View.GONE : View.VISIBLE);
+        }
+        // Aqui poderíamos também atualizar outros elementos da UI se necessário
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Atualiza UI ao retornar para a Activity (ex: após voltar do fluxo de pagamento do Google Play)
+        if (buttonAssinarPremium != null) {
+            boolean isPremium = SubscriptionService.getInstance(this).isSubscriptionActive();
+            updatePremiumUI(isPremium);
         }
     }
     

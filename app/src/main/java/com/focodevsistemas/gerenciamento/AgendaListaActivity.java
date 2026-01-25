@@ -56,7 +56,7 @@ public class AgendaListaActivity extends AppCompatActivity {
         // Verifica se há uma data passada via Intent
         long dataExtra = getIntent().getLongExtra("dataSelecionada", -1);
         if (dataExtra != -1) {
-            dataSelecionada = dataExtra;
+            dataSelecionada = getTimestampInicioDoDia(dataExtra);
             mostrarTodos = false;
         } else {
             mostrarTodos = true;
@@ -132,11 +132,13 @@ public class AgendaListaActivity extends AppCompatActivity {
         List<Agendamento> agendamentos;
         
         if (mostrarTodos) {
-            // Busca todos os agendamentos (próximos 6 meses)
-            Calendar cal = Calendar.getInstance();
-            long inicio = getTimestampInicioDoDia(cal.getTimeInMillis());
-            cal.add(Calendar.MONTH, 6);
-            long fim = getTimestampInicioDoDia(cal.getTimeInMillis()) + (24L * 60 * 60 * 1000) - 1;
+            Calendar inicioCal = Calendar.getInstance();
+            inicioCal.add(Calendar.MONTH, -6);
+            long inicio = getTimestampInicioDoDia(inicioCal.getTimeInMillis());
+            
+            Calendar fimCal = Calendar.getInstance();
+            fimCal.add(Calendar.MONTH, 6);
+            long fim = getTimestampInicioDoDia(fimCal.getTimeInMillis()) + (24L * 60 * 60 * 1000) - 1;
             agendamentos = agendamentoDAO.getAgendamentosPorPeriodo(inicio, fim);
         } else {
             // Busca apenas do dia selecionado
@@ -233,10 +235,26 @@ public class AgendaListaActivity extends AppCompatActivity {
         if (agendamentosFiltrados.isEmpty()) {
             expandableListViewAgendamentos.setVisibility(View.GONE);
             textViewDica.setVisibility(View.VISIBLE);
-            if (mostrarTodos) {
-                textViewDica.setText("Nenhum agendamento encontrado.\nToque no '+' para adicionar.");
+            int totalNoBanco = agendamentoDAO != null ? agendamentoDAO.getTotalAgendamentos() : 0;
+            if (totalNoBanco > 0) {
+                long min = agendamentoDAO.getMinDataHoraInicio();
+                long max = agendamentoDAO.getMaxDataHoraInicio();
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+                String faixa = "";
+                if (min > 0 && max > 0) {
+                    faixa = "\nFaixa no banco: " + sdf.format(new java.util.Date(min)) + " a " + sdf.format(new java.util.Date(max));
+                }
+                if (mostrarTodos) {
+                    textViewDica.setText("Nenhum agendamento encontrado no período atual." + faixa);
+                } else {
+                    textViewDica.setText("Nenhum agendamento para este dia." + faixa);
+                }
             } else {
-                textViewDica.setText("Nenhum agendamento para este dia.\nToque no '+' para adicionar.");
+                if (mostrarTodos) {
+                    textViewDica.setText("Nenhum agendamento encontrado.\nToque no '+' para adicionar.");
+                } else {
+                    textViewDica.setText("Nenhum agendamento para este dia.\nToque no '+' para adicionar.");
+                }
             }
         } else {
             expandableListViewAgendamentos.setVisibility(View.VISIBLE);

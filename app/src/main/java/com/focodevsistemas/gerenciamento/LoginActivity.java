@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.focodevsistemas.gerenciamento.utils.RSAUtils;
 import com.google.android.material.button.MaterialButton;
 
 public class LoginActivity extends AppCompatActivity {
@@ -124,6 +125,9 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         carregarCredenciais();
+
+        // TODO: Remover após copiar as chaves do Logcat (Tag: RSAUtils)
+        RSAUtils.logNewKeyPair();
     }
 
     private void carregarCredenciais() {

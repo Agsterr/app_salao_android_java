@@ -216,7 +216,8 @@ public class PDFGeneratorHelper {
                     Produto p = produtoDAO.getProdutoById(item.getProdutoId());
                     if (p != null) {
                         if (i > 0) produtosStr.append(", ");
-                        produtosStr.append(p.getNome()).append(" x").append(item.getQuantidade());
+                        produtosStr.append(p.getNome()).append(" (x").append(item.getQuantidade())
+                                   .append(" ").append(nf.format(p.getPrecoVenda())).append(")");
                         // Calcular lucro: (preço de venda - preço de aquisição) * quantidade
                         double lucroUnitario = p.getPrecoVenda() - p.getPrecoAquisicao();
                         lucroVenda += lucroUnitario * item.getQuantidade();
@@ -275,7 +276,8 @@ public class PDFGeneratorHelper {
      * Gera um PDF de relatório de recebimentos (valores a receber ou valores recebidos).
      */
     public static File gerarPDFRecebimentos(Context context, List<Recebimento> recebimentos, 
-                                            int status, VendaDAO vendaDAO, ClienteDAO clienteDAO) 
+                                            int status, VendaDAO vendaDAO, ClienteDAO clienteDAO,
+                                            VendaItemDAO vendaItemDAO, ProdutoDAO produtoDAO) 
                                             throws IOException, DocumentException {
         File documentsDir = new File(context.getExternalFilesDir(null), "Relatorios");
         if (!documentsDir.exists()) {
@@ -319,11 +321,11 @@ public class PDFGeneratorHelper {
         // Tabela
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{2f, 1.5f, 2f, 2f, 1.5f});
+        table.setWidths(new float[]{2f, 2.5f, 2f, 2f, 1.5f}); // Aumentei a coluna da Parcela/Descrição
 
         // Cabeçalho
         table.addCell(new PdfPCell(new Paragraph("Cliente", FONT_NORMAL_BOLD)));
-        table.addCell(new PdfPCell(new Paragraph("Parcela", FONT_NORMAL_BOLD)));
+        table.addCell(new PdfPCell(new Paragraph("Descrição", FONT_NORMAL_BOLD)));
         table.addCell(new PdfPCell(new Paragraph("Data Prevista", FONT_NORMAL_BOLD)));
         if (status == RecebimentoDAO.STATUS_PAGO) {
             table.addCell(new PdfPCell(new Paragraph("Data Pagamento", FONT_NORMAL_BOLD)));
@@ -340,7 +342,37 @@ public class PDFGeneratorHelper {
             
             for (Recebimento r : entry.getValue()) {
                 table.addCell(new PdfPCell(new Paragraph(clienteNome, FONT_NORMAL)));
-                table.addCell(new PdfPCell(new Paragraph("Parcela " + r.getNumeroParcela(), FONT_NORMAL)));
+                
+                // Buscar detalhes dos produtos
+                StringBuilder descricao = new StringBuilder();
+                descricao.append("Parcela ").append(r.getNumeroParcela());
+                
+                if (vendaItemDAO != null && produtoDAO != null) {
+                    List<VendaItem> itens = vendaItemDAO.getItensByVendaId(r.getVendaId());
+                    if (!itens.isEmpty()) {
+                        descricao.append("\nRef: ");
+                        for (int i = 0; i < itens.size(); i++) {
+                            VendaItem item = itens.get(i);
+                            Produto p = produtoDAO.getProdutoById(item.getProdutoId());
+                            if (p != null) {
+                                if (i > 0) descricao.append(", ");
+                                descricao.append(p.getNome()).append(" (x").append(item.getQuantidade()).append(")");
+                            }
+                        }
+                    } else {
+                        // Venda antiga ou sem itens
+                        Venda v = vendaDAO.getVendaById(r.getVendaId());
+                        if (v != null && v.getProdutoId() > 0) {
+                            Produto p = produtoDAO.getProdutoById(v.getProdutoId());
+                            if (p != null) {
+                                descricao.append("\nRef: ").append(p.getNome());
+                            }
+                        }
+                    }
+                }
+                
+                table.addCell(new PdfPCell(new Paragraph(descricao.toString(), FONT_PEQUENO))); // Fonte menor para caber
+                
                 table.addCell(new PdfPCell(new Paragraph(sdf.format(new Date(r.getDataPrevista())), FONT_NORMAL)));
                 
                 if (status == RecebimentoDAO.STATUS_PAGO) {

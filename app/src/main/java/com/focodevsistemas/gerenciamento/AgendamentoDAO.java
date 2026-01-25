@@ -453,4 +453,58 @@ public class AgendamentoDAO {
         }
         return total;
     }
+
+    public int getTotalAgendamentos() {
+        int total = 0;
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM " + DatabaseHelper.TABLE_AGENDAMENTOS,
+                null
+        );
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst() && !cursor.isNull(0)) {
+                    total = cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return total;
+    }
+
+    public long getMinDataHoraInicio() {
+        long min = 0L;
+        Cursor cursor = db.rawQuery(
+                "SELECT MIN(" + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + ") FROM " + DatabaseHelper.TABLE_AGENDAMENTOS,
+                null
+        );
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst() && !cursor.isNull(0)) {
+                    min = cursor.getLong(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return min;
+    }
+
+    public long getMaxDataHoraInicio() {
+        long max = 0L;
+        Cursor cursor = db.rawQuery(
+                "SELECT MAX(" + DatabaseHelper.COLUMN_AGENDAMENTO_DATA_HORA_INICIO + ") FROM " + DatabaseHelper.TABLE_AGENDAMENTOS,
+                null
+        );
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst() && !cursor.isNull(0)) {
+                    max = cursor.getLong(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return max;
+    }
 }

@@ -77,15 +77,10 @@ public class PlanManager {
 
     /**
      * Retorna o plano atual do usuário.
-     * Em modo de teste, sempre retorna PREMIUM.
      * 
      * @return Plano atual (FREE ou PREMIUM)
      */
     public PlanType getCurrentPlan() {
-        // Em modo de teste, sempre retorna PREMIUM para liberar todas as funcionalidades
-        if (isTestMode()) {
-            return PlanType.PREMIUM;
-        }
         return currentPlan;
     }
 
@@ -105,35 +100,24 @@ public class PlanManager {
 
     /**
      * Verifica se o usuário possui plano PREMIUM.
-     * Em modo de teste, sempre retorna true.
      * 
      * @return true se o plano for PREMIUM, false caso contrário
      */
     public boolean isPremium() {
-        // Em modo de teste, sempre retorna true
-        if (isTestMode()) {
-            return true;
-        }
         return currentPlan == PlanType.PREMIUM;
     }
 
     /**
      * Verifica se o usuário possui plano FREE.
-     * Em modo de teste, sempre retorna false.
      * 
      * @return true se o plano for FREE, false caso contrário
      */
     public boolean isFree() {
-        // Em modo de teste, sempre retorna false (porque é PREMIUM)
-        if (isTestMode()) {
-            return false;
-        }
         return currentPlan == PlanType.FREE;
     }
 
     /**
      * Verifica se uma funcionalidade está liberada para o plano atual.
-     * Em modo de teste, sempre retorna true.
      * 
      * @param feature Funcionalidade a ser verificada
      * @return true se a funcionalidade está liberada, false caso contrário
@@ -141,11 +125,6 @@ public class PlanManager {
     public boolean isFeatureEnabled(Feature feature) {
         if (feature == null) {
             return false;
-        }
-        
-        // Em modo de teste, sempre libera todas as funcionalidades
-        if (isTestMode()) {
-            return true;
         }
         
         // Funcionalidades FREE estão sempre liberadas

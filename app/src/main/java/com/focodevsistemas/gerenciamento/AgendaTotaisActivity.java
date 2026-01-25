@@ -33,10 +33,9 @@ public class AgendaTotaisActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Verificar acesso antes de abrir a Activity
         FeatureGate featureGate = new FeatureGate(this);
-        if (!featureGate.checkAccessAndBlock(this, "Relatórios", featureGate.canAccessReports())) {
-            // Acesso bloqueado - dialog já foi exibido, fechar Activity
+        if (!featureGate.canAccessReports()) {
+            Toast.makeText(this, "Recurso disponível apenas no plano PREMIUM.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }

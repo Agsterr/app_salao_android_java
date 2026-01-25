@@ -102,14 +102,14 @@
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         android:hint="Valor Mínimo"
+                        app:placeholderText="R$ 0,00"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTextValorMinimo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:hint="R$ 0,00" />
+                            android:inputType="numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -118,14 +118,14 @@
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
                         android:hint="Valor Máximo"
+                        app:placeholderText="R$ 0,00"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTextValorMaximo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:hint="R$ 0,00" />
+                            android:inputType="numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 

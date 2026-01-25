@@ -31,10 +31,15 @@ public class RelatoriosProdutosActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Proteção Premium
+        if (!PremiumManager.getInstance(this).verificarAcessoEmActivity(this, "Relatórios de Produtos")) {
+            return;
+        }
+        
         setContentView(R.layout.activity_relatorios_produtos);
         
         setupActionBar();
-        setupPremiumUI();
+        // setupPremiumUI removido
         setupViews();
         setupListeners();
     }
@@ -149,7 +154,20 @@ public class RelatoriosProdutosActivity extends AppCompatActivity {
                 ProdutoDAO produtoDAO = new ProdutoDAO(this);
                 produtoDAO.open();
                 List<Produto> todosProdutos = produtoDAO.getAllProdutos();
+                int totalProdutos = produtoDAO.getTotalProdutos();
                 produtoDAO.close();
+                
+                if (todosProdutos.isEmpty() && totalProdutos > 0) {
+                    android.util.Log.w("RelatoriosProdutosActivity", "Produtos no banco, mas getAllProdutos retornou vazio. Total: " + totalProdutos);
+                }
+                if (todosProdutos.isEmpty() && totalProdutos == 0) {
+                    runOnUiThread(() -> android.widget.Toast.makeText(
+                            this,
+                            "Nenhum produto cadastrado no banco de dados.",
+                            android.widget.Toast.LENGTH_SHORT
+                    ).show());
+                    return;
+                }
                 
                 // Filtrar produtos por valor (usando preço de venda)
                 List<Produto> produtosFiltrados = new ArrayList<>();
@@ -252,4 +270,3 @@ public class RelatoriosProdutosActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
-

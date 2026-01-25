@@ -57,6 +57,11 @@ public class RelatoriosServicosActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Proteção Premium
+        if (!PremiumManager.getInstance(this).verificarAcessoEmActivity(this, "Relatórios de Serviços")) {
+            return;
+        }
+        
         setContentView(R.layout.activity_relatorios_servicos);
         
         setupActionBar();
@@ -64,7 +69,7 @@ public class RelatoriosServicosActivity extends AppCompatActivity {
         bindViews();
         setupSpinners();
         setupListeners();
-        setupPremiumUI();
+        // setupPremiumUI removido
         
         carregarDados();
     }
@@ -144,7 +149,7 @@ public class RelatoriosServicosActivity extends AppCompatActivity {
 
     private void setupSpinners() {
         // Spinner de período
-        String[] periodos = {"Hoje", "Esta Semana", "Este Mês", "Este Ano", "Personalizado"};
+        String[] periodos = {"Hoje", "Esta Semana", "Este Mês", "Este Ano", "Ano Passado", "Todo o Período", "Personalizado"};
         ArrayAdapter<String> periodoAdapter = new ArrayAdapter<>(this, 
             android.R.layout.simple_spinner_item, periodos);
         periodoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -553,6 +558,55 @@ public class RelatoriosServicosActivity extends AppCompatActivity {
                 cal.add(Calendar.YEAR, 1);
                 fim = cal.getTimeInMillis() - 1;
                 break;
+            case "Ano Passado":
+                cal.set(Calendar.MONTH, Calendar.JANUARY);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                cal.add(Calendar.YEAR, -1); // Voltar para o início do ano passado
+                inicio = cal.getTimeInMillis();
+                cal.add(Calendar.YEAR, 1); // Avançar um ano para chegar ao início deste ano
+                fim = cal.getTimeInMillis() - 1; // Um milissegundo antes do início deste ano
+                break;
+            case "Todo o Período":
+                long minData = agendamentoDAO.getMinDataHoraInicio();
+                long maxData = agendamentoDAO.getMaxDataHoraInicio();
+                
+                if (minData > 0 && maxData > 0) {
+                    // Ajustar início para o começo do dia da primeira data
+                    cal.setTimeInMillis(minData);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    inicio = cal.getTimeInMillis();
+                    
+                    // Ajustar fim para o final do dia da última data (ou hoje, o que for maior)
+                    long agora = System.currentTimeMillis();
+                    if (agora > maxData) maxData = agora;
+                    
+                    cal.setTimeInMillis(maxData);
+                    cal.set(Calendar.HOUR_OF_DAY, 23);
+                    cal.set(Calendar.MINUTE, 59);
+                    cal.set(Calendar.SECOND, 59);
+                    cal.set(Calendar.MILLISECOND, 999);
+                    // Adicionar margem de segurança para agendamentos futuros
+                    cal.add(Calendar.DAY_OF_MONTH, 1); 
+                    fim = cal.getTimeInMillis();
+                } else {
+                    // Sem dados, usar mês atual como fallback visual
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    inicio = cal.getTimeInMillis();
+                    cal.add(Calendar.MONTH, 1);
+                    fim = cal.getTimeInMillis() - 1;
+                }
+                break;
             default:
                 // Personalizado sem datas selecionadas ou período desconhecido - usar mês atual como padrão
                 cal.set(Calendar.DAY_OF_MONTH, 1);
@@ -572,6 +626,21 @@ public class RelatoriosServicosActivity extends AppCompatActivity {
         // Histórico com todos os filtros aplicados
         List<String> historico = new ArrayList<>();
         List<Agendamento> agendamentos = agendamentoDAO.getAgendamentosPorPeriodo(inicio, fim);
+        this.agendamentosAtuais = agendamentos; // Armazenar para uso na correção
+        if (agendamentos.isEmpty()) {
+            int totalNoBanco = agendamentoDAO.getTotalAgendamentos();
+            if (totalNoBanco > 0) {
+                long min = agendamentoDAO.getMinDataHoraInicio();
+                long max = agendamentoDAO.getMaxDataHoraInicio();
+                SimpleDateFormat sdfD = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                String faixa = (min > 0 && max > 0) ? (sdfD.format(new java.util.Date(min)) + " a " + sdfD.format(new java.util.Date(max))) : "N/A";
+                android.widget.Toast.makeText(
+                        this,
+                        "Sem dados no período. Total no banco: " + totalNoBanco + " (faixa: " + faixa + ")",
+                        android.widget.Toast.LENGTH_LONG
+                ).show();
+            }
+        }
         
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         
@@ -634,6 +703,12 @@ public class RelatoriosServicosActivity extends AppCompatActivity {
                 tempoFormatado,
                 nf.format(ag.getValor()),
                 statusAgendamento);
+            
+            // Indicador visual de valor zero
+            if (ag.getValor() == 0.0 && ag.getCancelado() == 0) {
+                linha += " ⚠️ [Sem Valor]";
+            }
+            
             historico.add(linha);
             
             // Somar ao faturamento apenas se não estiver cancelado
@@ -646,8 +721,27 @@ public class RelatoriosServicosActivity extends AppCompatActivity {
         if (Double.isNaN(faturamentoFiltrado)) faturamentoFiltrado = 0.0;
         textFaturamentoTotal.setText("Faturamento: " + nf.format(faturamentoFiltrado));
         
+        // Alerta se houver registros finalizados mas faturamento zerado
+        if (faturamentoFiltrado == 0.0 && !agendamentos.isEmpty() && "Finalizados".equals(statusSelecionado)) {
+             boolean temFinalizados = false;
+             for (Agendamento ag : agendamentos) {
+                 if (ag.getFinalizado() == 1 && ag.getCancelado() == 0) {
+                     temFinalizados = true;
+                     break;
+                 }
+             }
+             if (temFinalizados) {
+                 android.widget.Toast.makeText(this, "Aviso: Serviços finalizados encontrados, mas com valor zero. Verifique o cadastro dos serviços.", android.widget.Toast.LENGTH_LONG).show();
+             }
+        }
+        
         if (historico.isEmpty()) {
-            historico.add("Nenhum registro encontrado para o período selecionado.");
+            if ("Este Ano".equals(periodoSelecionado) || "Hoje".equals(periodoSelecionado) || "Este Mês".equals(periodoSelecionado)) {
+                 historico.add("Nenhum registro encontrado neste período.");
+                 historico.add("Dica: Tente selecionar 'Ano Passado' ou 'Todo o Período' para ver registros antigos.");
+            } else {
+                 historico.add("Nenhum registro encontrado para o período selecionado.");
+            }
         }
         
         historicoAdapter.clear();
@@ -848,13 +942,120 @@ public class RelatoriosServicosActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    // Variável de membro para armazenar os agendamentos atuais (para uso na correção)
+    private List<Agendamento> agendamentosAtuais;
+
+    @Override
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_relatorios_servicos, menu);
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
+        } else if (item.getItemId() == R.id.action_corrigir_valores) {
+            iniciarCorrecaoValores();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
-}
 
+    private void iniciarCorrecaoValores() {
+        if (agendamentosAtuais == null || agendamentosAtuais.isEmpty()) {
+            android.widget.Toast.makeText(this, "Nenhum agendamento listado para corrigir.", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Filtrar agendamentos com valor zero e não cancelados
+        java.util.Map<String, List<Agendamento>> servicosZerados = new java.util.HashMap<>();
+        int totalZerados = 0;
+
+        for (Agendamento ag : agendamentosAtuais) {
+            if (ag.getCancelado() == 0 && ag.getValor() == 0.0) {
+                String nomeServico = ag.getNomeServico() != null ? ag.getNomeServico() : "Serviço sem nome";
+                if (!servicosZerados.containsKey(nomeServico)) {
+                    servicosZerados.put(nomeServico, new ArrayList<>());
+                }
+                servicosZerados.get(nomeServico).add(ag);
+                totalZerados++;
+            }
+        }
+
+        if (totalZerados == 0) {
+            android.widget.Toast.makeText(this, "Não há agendamentos com valor zero na lista atual.", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Mostrar dialog explicativo
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("Corrigir Valores")
+            .setMessage("Encontramos " + totalZerados + " agendamentos com valor R$ 0,00.\n\n" +
+                        "Isso pode acontecer se o valor não foi informado na criação.\n\n" +
+                        "Deseja definir um valor para esses serviços agora?")
+            .setPositiveButton("Sim, Corrigir", (dialog, which) -> {
+                corrigirProximoServico(new ArrayList<>(servicosZerados.keySet()), servicosZerados, 0);
+            })
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    private void corrigirProximoServico(List<String> nomesServicos, java.util.Map<String, List<Agendamento>> mapa, int index) {
+        if (index >= nomesServicos.size()) {
+            // Terminou
+            android.widget.Toast.makeText(this, "Correção concluída! Atualizando relatório...", android.widget.Toast.LENGTH_SHORT).show();
+            gerarRelatorio(); // Recarrega a lista
+            return;
+        }
+
+        String nomeServico = nomesServicos.get(index);
+        List<Agendamento> listaParaCorrigir = mapa.get(nomeServico);
+        int qtd = listaParaCorrigir.size();
+
+        // Input para o valor
+        final android.widget.EditText input = new android.widget.EditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        input.setHint("Ex: 50.00");
+
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("Valor para '" + nomeServico + "'")
+            .setMessage("Existem " + qtd + " registros deste serviço com valor zero.\nQual deve ser o valor unitário?")
+            .setView(input)
+            .setPositiveButton("Aplicar", (dialog, which) -> {
+                String valorStr = input.getText().toString().trim().replace(",", ".");
+                try {
+                    double novoValor = Double.parseDouble(valorStr);
+                    if (novoValor > 0) {
+                        aplicarValorEmMassa(listaParaCorrigir, novoValor);
+                        corrigirProximoServico(nomesServicos, mapa, index + 1);
+                    } else {
+                        android.widget.Toast.makeText(this, "Valor inválido. Pulei este serviço.", android.widget.Toast.LENGTH_SHORT).show();
+                        corrigirProximoServico(nomesServicos, mapa, index + 1);
+                    }
+                } catch (NumberFormatException e) {
+                    android.widget.Toast.makeText(this, "Valor inválido. Pulei este serviço.", android.widget.Toast.LENGTH_SHORT).show();
+                    corrigirProximoServico(nomesServicos, mapa, index + 1);
+                }
+            })
+            .setNegativeButton("Pular", (dialog, which) -> {
+                corrigirProximoServico(nomesServicos, mapa, index + 1);
+            })
+            .setCancelable(false)
+            .show();
+    }
+
+    private void aplicarValorEmMassa(List<Agendamento> lista, double valor) {
+        int sucesso = 0;
+        for (Agendamento ag : lista) {
+            ag.setValor(valor);
+            // Usar o método ignorando conflito para ser mais rápido e garantir atualização
+            if (agendamentoDAO.atualizarAgendamentoIgnorandoConflito(ag) > 0) {
+                sucesso++;
+            }
+        }
+        // Log ou Toast opcional
+        android.util.Log.d("CorrecaoMassa", "Atualizados " + sucesso + " registros com valor " + valor);
+    }
+}

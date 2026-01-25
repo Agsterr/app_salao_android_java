@@ -42,7 +42,7 @@
 **Solução:** Restringir apenas aos diretórios necessários.
 
 ### 6. Versão do App
-**Status:** versionCode 1 e versionName "1.0" - OK para primeira publicação.
+**Status:** versionCode 13 e versionName "1.1.3" - Atualizado.
 
 ## ✅ PONTOS POSITIVOS
 
@@ -79,6 +79,7 @@ O app coleta os seguintes dados:
 - Credenciais de login (armazenadas localmente)
 
 **Recomendação:** Todos esses dados são armazenados localmente no dispositivo. A política de privacidade deve deixar isso claro.
+
 
 
 

@@ -6,6 +6,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
@@ -46,16 +48,7 @@ public class BillingManager {
         PurchasesUpdatedListener purchasesUpdatedListener = (billingResult, purchases) -> {
             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
                 for (Purchase purchase : purchases) {
-                    // Processar a compra: notificar SubscriptionService
-                    Log.d(TAG, "Compra bem-sucedida: " + purchase.getOrderId());
-                    
-                    // Notificar SubscriptionService sobre a compra concluída
-                    try {
-                        SubscriptionService subscriptionService = SubscriptionService.getInstance(context);
-                        subscriptionService.onPurchaseCompleted(purchase);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Erro ao notificar SubscriptionService sobre compra", e);
-                    }
+                    handlePurchase(purchase);
                 }
             } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
                 Log.d(TAG, "Usuário cancelou a compra.");
@@ -76,6 +69,39 @@ public class BillingManager {
                 .build();
 
         startConnection();
+    }
+
+    private void handlePurchase(Purchase purchase) {
+        if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+            if (!purchase.isAcknowledged()) {
+                AcknowledgePurchaseParams acknowledgePurchaseParams =
+                        AcknowledgePurchaseParams.newBuilder()
+                                .setPurchaseToken(purchase.getPurchaseToken())
+                                .build();
+                billingClient.acknowledgePurchase(acknowledgePurchaseParams, billingResult -> {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                        Log.d(TAG, "Compra reconhecida com sucesso: " + purchase.getOrderId());
+                        notifySubscriptionService(purchase);
+                    } else {
+                        Log.e(TAG, "Falha ao reconhecer compra: " + billingResult.getDebugMessage());
+                    }
+                });
+            } else {
+                // Já reconhecida, apenas libera o acesso
+                notifySubscriptionService(purchase);
+            }
+        } else if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING) {
+             Log.d(TAG, "Compra pendente. Aguardando confirmação.");
+        }
+    }
+
+    private void notifySubscriptionService(Purchase purchase) {
+        try {
+            SubscriptionService subscriptionService = SubscriptionService.getInstance(context);
+            subscriptionService.onPurchaseCompleted(purchase);
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao notificar SubscriptionService sobre compra", e);
+        }
     }
 
     private void startConnection() {
@@ -169,8 +195,14 @@ public class BillingManager {
             return;
         }
 
-        // Pegando o token da primeira oferta (geralmente a oferta base)
+        // Tenta encontrar uma oferta válida (ex: oferta base, ou a primeira disponível)
+        // Em um cenário real, você pode filtrar por tags ou preços específicos
         String offerToken = productDetails.getSubscriptionOfferDetails().get(0).getOfferToken();
+
+        // Log das ofertas para debug
+        for (ProductDetails.SubscriptionOfferDetails offer : productDetails.getSubscriptionOfferDetails()) {
+             Log.d(TAG, "Oferta disponível: " + offer.getOfferId() + " Token: " + offer.getOfferToken());
+        }
 
         List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList =
                 Collections.singletonList(

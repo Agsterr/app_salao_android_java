@@ -61,7 +61,8 @@ public class BackupActivity extends AppCompatActivity {
                         if (uri != null) {
                             boolean ok = importDatabaseFromUri(uri);
                             if (ok) {
-                                Toast.makeText(this, "Dados importados. Reinicie o app para aplicar.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, "Dados importados. Reiniciando o app…", Toast.LENGTH_LONG).show();
+                                restartApp();
                             } else {
                                 Toast.makeText(this, "Falha ao importar dados", Toast.LENGTH_LONG).show();
                             }
@@ -139,5 +140,16 @@ public class BackupActivity extends AppCompatActivity {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private void restartApp() {
+        Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        if (intent == null) {
+            intent = new Intent(this, LoginActivity.class);
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finishAffinity();
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 }

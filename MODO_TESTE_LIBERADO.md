@@ -96,3 +96,4 @@ Agora você pode:
 - ✅ Não precisa ativar assinatura para testar
 - ✅ Todas as funcionalidades funcionam normalmente durante testes
 
+

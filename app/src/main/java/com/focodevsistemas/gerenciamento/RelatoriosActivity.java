@@ -514,6 +514,55 @@ public class RelatoriosActivity extends AppCompatActivity {
                 cal.add(Calendar.YEAR, 1);
                 fim = cal.getTimeInMillis() - 1;
                 break;
+            case "Ano Passado":
+                cal.set(Calendar.MONTH, Calendar.JANUARY);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                cal.add(Calendar.YEAR, -1); // Voltar para o início do ano passado
+                inicio = cal.getTimeInMillis();
+                cal.add(Calendar.YEAR, 1); // Avançar um ano para chegar ao início deste ano
+                fim = cal.getTimeInMillis() - 1; // Um milissegundo antes do início deste ano
+                break;
+            case "Todo o Período":
+                long minData = agendamentoDAO.getMinDataHoraInicio();
+                long maxData = agendamentoDAO.getMaxDataHoraInicio();
+                
+                if (minData > 0 && maxData > 0) {
+                    // Ajustar início para o começo do dia da primeira data
+                    cal.setTimeInMillis(minData);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    inicio = cal.getTimeInMillis();
+                    
+                    // Ajustar fim para o final do dia da última data (ou hoje, o que for maior)
+                    long agora = System.currentTimeMillis();
+                    if (agora > maxData) maxData = agora;
+                    
+                    cal.setTimeInMillis(maxData);
+                    cal.set(Calendar.HOUR_OF_DAY, 23);
+                    cal.set(Calendar.MINUTE, 59);
+                    cal.set(Calendar.SECOND, 59);
+                    cal.set(Calendar.MILLISECOND, 999);
+                    // Adicionar margem de segurança
+                    cal.add(Calendar.DAY_OF_MONTH, 1); 
+                    fim = cal.getTimeInMillis();
+                } else {
+                    // Sem dados, usar mês atual como fallback visual
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    inicio = cal.getTimeInMillis();
+                    cal.add(Calendar.MONTH, 1);
+                    fim = cal.getTimeInMillis() - 1;
+                }
+                break;
             default:
                 // Personalizado sem datas selecionadas ou período desconhecido - usar mês atual como padrão
                 cal.set(Calendar.DAY_OF_MONTH, 1);
@@ -547,16 +596,25 @@ public class RelatoriosActivity extends AppCompatActivity {
                 continue;
             }
             
-            if (ag.getCancelado() == 0 && ag.getFinalizado() == 1) {
+            // Log para debug
+            android.util.Log.d("RelatoriosActivity", "Processando agendamento: " + ag.getId() + 
+                " | Cancelado: " + ag.getCancelado() + 
+                " | Finalizado: " + ag.getFinalizado());
+
+            // Filtro relaxado: Mostrar todos não cancelados (Finalizados ou Pendentes)
+            if (ag.getCancelado() == 0) {
                 String dataFormatada = sdf.format(new java.util.Date(ag.getDataHoraInicio()));
                 String nomeCliente = ag.getNomeCliente() != null ? ag.getNomeCliente() : "Cliente";
                 String nomeServico = ag.getNomeServico() != null ? ag.getNomeServico() : "Serviço";
                 int tempoServico = ag.getTempoServico();
                 String tempoFormatado = tempoServico > 0 ? tempoServico + " min" : "N/A";
                 
+                String status = (ag.getFinalizado() == 1) ? "[Finalizado]" : "[Pendente]";
+                
                 // Formato melhorado: Data/Hora - Cliente | Serviço | Tempo | Valor
-                String linha = String.format("%s\n%s | %s | %s | %s", 
+                String linha = String.format("%s %s\n%s | %s | %s | %s", 
                     dataFormatada,
+                    status,
                     nomeCliente,
                     nomeServico,
                     tempoFormatado,
@@ -566,6 +624,7 @@ public class RelatoriosActivity extends AppCompatActivity {
         }
         
         if (historico.isEmpty()) {
+            android.util.Log.w("RelatoriosActivity", "Nenhum histórico encontrado após filtros.");
             historico.add("Nenhum registro encontrado para o período selecionado.");
         }
         
@@ -629,39 +688,44 @@ public class RelatoriosActivity extends AppCompatActivity {
                 // Tabela de dados
                 com.itextpdf.text.pdf.PdfPTable table = new com.itextpdf.text.pdf.PdfPTable(5);
                 table.setWidthPercentage(100);
-                table.setWidths(new float[]{2f, 2.5f, 2.5f, 1f, 1.5f});
+                table.setWidths(new float[]{2.5f, 2.5f, 2.5f, 1.5f, 1.5f});
                 
                 // Cabeçalho da tabela
                 com.itextpdf.text.Font fontHeader = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.BOLD);
                 table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase("Data/Hora", fontHeader)));
                 table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase("Cliente", fontHeader)));
                 table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase("Serviço", fontHeader)));
-                table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase("Tempo", fontHeader)));
+                table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase("Status", fontHeader)));
                 table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase("Valor", fontHeader)));
                 
                 // Dados
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
                 int count = 0;
+                
+                android.util.Log.d("RelatoriosActivity", "Gerando PDF com " + agendamentos.size() + " agendamentos totais.");
+                
                 for (Agendamento ag : agendamentos) {
                     if (clienteSelecionado.getId() > 0 && ag.getClienteId() != clienteSelecionado.getId()) {
                         continue;
                     }
                     
-                    if (ag.getCancelado() == 0 && ag.getFinalizado() == 1) {
+                    // Filtro relaxado: Incluir Pendentes e Finalizados (apenas excluir Cancelados)
+                    if (ag.getCancelado() == 0) {
                         String dataFormatada = sdf.format(new java.util.Date(ag.getDataHoraInicio()));
                         String nomeCliente = ag.getNomeCliente() != null ? ag.getNomeCliente() : "Cliente";
                         String nomeServico = ag.getNomeServico() != null ? ag.getNomeServico() : "Serviço";
-                        int tempoServico = ag.getTempoServico();
-                        String tempoFormatado = tempoServico > 0 ? tempoServico + " min" : "N/A";
+                        String status = (ag.getFinalizado() == 1) ? "Finalizado" : "Pendente";
                         
                         table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase(dataFormatada, fontNormal)));
                         table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase(nomeCliente, fontNormal)));
                         table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase(nomeServico, fontNormal)));
-                        table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase(tempoFormatado, fontNormal)));
+                        table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase(status, fontNormal)));
                         table.addCell(new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase(nf.format(ag.getValor()), fontNormal)));
                         count++;
                     }
                 }
+                
+                android.util.Log.d("RelatoriosActivity", "PDF gerado com " + count + " registros.");
                 
                 if (count == 0) {
                     com.itextpdf.text.pdf.PdfPCell emptyCell = new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase("Nenhum registro encontrado para o período selecionado.", fontNormal));
@@ -714,15 +778,19 @@ public class RelatoriosActivity extends AppCompatActivity {
                 List<Produto> produtos = produtoDAO.getAllProdutos();
                 produtoDAO.close();
                 
+                android.util.Log.d("RelatoriosActivity", "Produtos encontrados: " + produtos.size());
+                
                 if (produtos.isEmpty()) {
                     runOnUiThread(() -> {
-                        android.widget.Toast.makeText(this, "Nenhum produto encontrado.", 
+                        android.widget.Toast.makeText(this, "Nenhum produto encontrado no banco de dados.", 
                             android.widget.Toast.LENGTH_SHORT).show();
                     });
                     return;
                 }
                 
                 File pdfFile = PDFGeneratorHelper.gerarPDFProdutos(this, produtos);
+                
+                android.util.Log.d("RelatoriosActivity", "PDF de produtos gerado: " + pdfFile.getAbsolutePath());
                 
                 runOnUiThread(() -> {
                     android.widget.Toast.makeText(this, "PDF gerado com sucesso!\n" + pdfFile.getName(), 
@@ -762,9 +830,11 @@ public class RelatoriosActivity extends AppCompatActivity {
                 
                 List<Venda> vendas = vendaDAO.getAllVendas();
                 
+                android.util.Log.d("RelatoriosActivity", "Vendas encontradas: " + vendas.size());
+                
                 if (vendas.isEmpty()) {
                     runOnUiThread(() -> {
-                        android.widget.Toast.makeText(this, "Nenhuma venda encontrada.", 
+                        android.widget.Toast.makeText(this, "Nenhuma venda encontrada no banco de dados.", 
                             android.widget.Toast.LENGTH_SHORT).show();
                     });
                     vendaDAO.close();

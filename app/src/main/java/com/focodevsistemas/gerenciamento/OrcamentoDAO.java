@@ -37,6 +37,8 @@ public class OrcamentoDAO {
         values.put(DatabaseHelper.COLUMN_ORCAMENTO_TIPO, orcamento.getTipo());
         values.put(DatabaseHelper.COLUMN_ORCAMENTO_DATA_CRIACAO, orcamento.getDataCriacao());
         values.put(DatabaseHelper.COLUMN_ORCAMENTO_VALOR_TOTAL, orcamento.getValorTotal());
+        values.put(DatabaseHelper.COLUMN_ORCAMENTO_DESCONTO, orcamento.getDesconto());
+        values.put(DatabaseHelper.COLUMN_ORCAMENTO_ACRESCIMO, orcamento.getAcrescimo());
         values.put(DatabaseHelper.COLUMN_ORCAMENTO_OBSERVACOES, orcamento.getObservacoes());
         values.put(DatabaseHelper.COLUMN_ORCAMENTO_STATUS, orcamento.getStatus());
         
@@ -44,11 +46,8 @@ public class OrcamentoDAO {
         
         // Inserir itens
         if (orcamentoId > 0) {
-            if ("SERVICO".equals(orcamento.getTipo())) {
-                inserirItensServicos(orcamentoId, orcamento.getItensServicos());
-            } else if ("PRODUTO".equals(orcamento.getTipo())) {
-                inserirItensProdutos(orcamentoId, orcamento.getItensProdutos());
-            }
+            inserirItensServicos(orcamentoId, orcamento.getItensServicos());
+            inserirItensProdutos(orcamentoId, orcamento.getItensProdutos());
         }
         
         return orcamentoId;
@@ -97,11 +96,8 @@ public class OrcamentoDAO {
             cursor.close();
             
             // Carregar itens
-            if ("SERVICO".equals(orcamento.getTipo())) {
-                orcamento.setItensServicos(getItensServicosByOrcamentoId(id));
-            } else if ("PRODUTO".equals(orcamento.getTipo())) {
-                orcamento.setItensProdutos(getItensProdutosByOrcamentoId(id));
-            }
+            orcamento.setItensServicos(getItensServicosByOrcamentoId(id));
+            orcamento.setItensProdutos(getItensProdutosByOrcamentoId(id));
             
             return orcamento;
         }
@@ -122,11 +118,8 @@ public class OrcamentoDAO {
                 long id = orcamento.getId();
                 
                 // Carregar itens
-                if ("SERVICO".equals(orcamento.getTipo())) {
-                    orcamento.setItensServicos(getItensServicosByOrcamentoId(id));
-                } else if ("PRODUTO".equals(orcamento.getTipo())) {
-                    orcamento.setItensProdutos(getItensProdutosByOrcamentoId(id));
-                }
+                orcamento.setItensServicos(getItensServicosByOrcamentoId(id));
+                orcamento.setItensProdutos(getItensProdutosByOrcamentoId(id));
                 
                 orcamentos.add(orcamento);
             } while (cursor.moveToNext());
