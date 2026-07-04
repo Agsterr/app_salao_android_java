@@ -1,240 +1,141 @@
-# 📱 Gerenciamento Total Mais
+# Gerenciamento Total Mais
 
-Sistema completo de gerenciamento para pequenos negócios, incluindo controle de clientes, produtos, vendas, recebimentos e agenda.
+App Android completo para **pequenos negócios** — controle de clientes, produtos, vendas, recebimentos, agenda e serviços. Tudo funciona localmente no dispositivo, sem depender de internet.
 
-## 🎯 Funcionalidades
+**Package:** `com.focodevsistemas.gerenciamento`
 
-### 👥 Gestão de Clientes
-- Cadastro completo de clientes
-- Listagem e busca de clientes
-- Edição e exclusão de registros
+---
 
-### 📦 Gestão de Produtos
-- Cadastro de produtos com foto
-- Definição de preços padrão
-- Descrição detalhada
-- Busca e filtragem
-- Compartilhamento de produtos
+## Funcionalidades
 
-### 💰 Vendas e Recebimentos
-- Registro de vendas
-- Vendas múltiplas (vários produtos)
-- Controle de recebimentos
-- Parcelamento de vendas
-- Status de pagamento (A Receber / Pago)
+### Clientes
+- Cadastro, listagem, busca, edição e exclusão
+
+### Produtos
+- Cadastro com foto, preços e descrição
+- Busca, filtragem e compartilhamento
+
+### Vendas e recebimentos
+- Registro de vendas simples e múltiplas
+- Parcelamento e status (A Receber / Pago)
 - Agrupamento por cliente
 
-### 📅 Agenda e Agendamentos
-- Agenda pessoal
-- Agendamentos de serviços
-- Calendário visual
-- Lembretes e notificações
-- Totais e lucros
+### Agenda
+- Calendário visual, agendamentos e lembretes
+- Totais e controle de lucros
 
-### 🔧 Serviços
-- Cadastro de serviços
-- Gestão de serviços oferecidos
-- Vinculação com agendamentos
+### Serviços
+- Cadastro e vínculo com agendamentos
 
-### 🔐 Segurança
-- Sistema de login com senha
-- Conta administrador padrão
-- Alteração de senha
-- Proteção de dados locais
+### Segurança e backup
+- Login com senha, conta admin padrão
+- Backup e restauração local dos dados
 
-### 💾 Backup
-- Sistema de backup dos dados
-- Restauração de backup
+### Assinatura premium
+- Google Play Billing para controle de acesso premium
 
-## 🚀 Como Compilar
+---
+
+## Tecnologias
+
+- Java
+- Android SDK 36 (mínimo API 28)
+- Material Design 3
+- SQLite (dados locais)
+- AndroidX, WorkManager, Billing Library
+
+---
+
+## Como compilar
 
 ### Pré-requisitos
-- Android Studio (versão mais recente)
-- JDK 17 ou superior (recomendado para compatibilidade com o Android Gradle Plugin)
+
+- Android Studio (versão recente)
+- JDK 17+
 - Android SDK (API 28+)
 
 ### Passos
 
-1. **Clone o repositório**
-   ```bash
-   git clone [seu-repositorio]
-   cd appDeTestes
-   ```
+```bash
+git clone https://github.com/Agsterr/app_salao_android_java.git
+cd app_salao_android_java
+```
 
-2. **Abra no Android Studio**
-   - File → Open → Selecione a pasta do projeto
+Abra no Android Studio, sincronize o Gradle e execute:
 
-3. **Sincronize o Gradle**
-   - O Android Studio irá sincronizar automaticamente
-   - Aguarde o download das dependências
+```bash
+./gradlew :app:assembleProdDebug
+```
 
-4. **Compile o projeto (Debug)**
-   - Build → Make Project (Ctrl+F9)
-   - Ou execute:
-     ```bash
-     ./gradlew :app:assembleProdDebug
-     ```
+---
 
-5. **Execute no dispositivo/emulador**
-   - Conecte um dispositivo Android ou inicie um emulador
-   - Clique em Run (Shift+F10)
+## Canais de distribuição (flavors)
 
-## 🧪 Canais de Distribuição (Flavors)
-
-O projeto usa flavors para separar comportamento de produção vs. canal de teste da Play Store:
-
-- `prod`: build de produção (`BuildConfig.DISTRIBUTION_CHANNEL = "prod"`)
-- `playTest`: build para testes na Play Store (`BuildConfig.DISTRIBUTION_CHANNEL = "test"`)
-
-No `playTest`, a checagem de assinatura é bypassada automaticamente para facilitar o teste em tracks internos/fechados (sem backdoor manual). Em `prod`, a assinatura continua sendo obrigatória.
-
-### Comandos úteis
+| Flavor | Uso |
+|--------|-----|
+| `prod` | Build de produção |
+| `playTest` | Testes na Play Store (assinatura bypassada) |
 
 ```bash
 ./gradlew :app:assembleProdDebug
 ./gradlew :app:assemblePlayTestDebug
 ```
 
-## 📦 Build de Release
+---
 
-Para gerar um APK/AAB para publicação:
-
-```bash
-./gradlew :app:assembleProdRelease
-```
-
-O arquivo será gerado em: `app/build/outputs/apk/prod/release/app-prod-release.apk`
-
-Para gerar um AAB (Android App Bundle):
+## Build de release
 
 ```bash
-./gradlew :app:bundleProdRelease
+./gradlew :app:assembleProdRelease    # APK
+./gradlew :app:bundleProdRelease      # AAB para Play Store
 ```
 
-O arquivo será gerado em: `app/build/outputs/bundle/prodRelease/app-prod-release.aab`
-
-### Assinatura de release (obrigatória)
-
-Os builds `Release` exigem configuração de assinatura. Você pode configurar de duas formas:
-
-- Criando `keystore.properties` no root do projeto (não commitar)
-- Exportando variáveis de ambiente (recomendado para CI)
-
-Variáveis suportadas:
+Assinatura obrigatória via `keystore.properties` (não commitar) ou variáveis de ambiente:
 
 - `RELEASE_STORE_FILE`
 - `RELEASE_STORE_PASSWORD`
 - `RELEASE_KEY_ALIAS`
 - `RELEASE_KEY_PASSWORD`
 
-## 🔑 Credenciais Padrão
+---
 
-**Usuário:** `admin`  
-**Senha:** `admin`
+## Credenciais padrão
 
-⚠️ **Importante:** Altere a senha padrão após o primeiro acesso!
+| Campo | Valor |
+|-------|-------|
+| Usuário | `admin` |
+| Senha | `admin` |
 
-## 💳 Assinatura (Google Play Billing)
+Altere a senha após o primeiro acesso.
 
-- O app usa a Billing Library para controlar acesso premium por assinatura.
-- O ID do produto de assinatura é lido em build-time via `SUBSCRIPTION_PRODUCT_ID` (com fallback para `premium_monthly`).
+---
 
-Para trocar o produto sem alterar código:
+## Assinatura Google Play
 
-**macOS/Linux (ou Git Bash):**
-```bash
-SUBSCRIPTION_PRODUCT_ID=premium_monthly ./gradlew :app:assembleProdDebug
-```
+O ID do produto é configurado em build-time via `SUBSCRIPTION_PRODUCT_ID` (padrão: `premium_monthly`).
 
-**Windows (PowerShell):**
 ```powershell
+# Windows
 $env:SUBSCRIPTION_PRODUCT_ID="premium_monthly"
 ./gradlew :app:assembleProdDebug
 ```
 
-## 📋 Requisitos do Sistema
+---
 
-- **Android mínimo:** 9.0 (API 28)
-- **Android alvo:** 14.0+ (API 36)
-- **Permissões necessárias:**
-  - Câmera (para fotos de produtos)
-  - Armazenamento (para salvar imagens)
-  - Notificações (para lembretes)
-  - Internet (para verificação de atualizações)
+## Documentação adicional
 
-## 🛠️ Tecnologias Utilizadas
-
-- **Linguagem:** Java
-- **UI:** Material Design 3
-- **Banco de Dados:** SQLite
-- **Arquitetura:** MVC (Model-View-Controller)
-- **Bibliotecas:**
-  - AndroidX AppCompat
-  - Material Components
-  - WorkManager (para tarefas em background)
-  - Billing Library (para assinaturas)
-
-## 📁 Estrutura do Projeto
-
-```
-app/
-├── src/
-│   ├── main/
-│   │   ├── java/com/focodevsistemas/gerenciamento/
-│   │   │   ├── *Activity.java       # Telas do app
-│   │   │   ├── *DAO.java            # Acesso a dados
-│   │   │   ├── *.java               # Modelos e utilitários
-│   │   ├── res/                     # Recursos (layouts, imagens, etc.)
-│   │   └── AndroidManifest.xml
-│   ├── test/                        # Testes unitários
-│   └── androidTest/                 # Testes instrumentados
-└── build.gradle
-```
-
-## 🔒 Privacidade e Segurança
-
-- Todos os dados são armazenados **localmente** no dispositivo
-- Nenhum dado do usuário é enviado para servidores externos
-- Dados protegidos por senha do aplicativo
-- Backup opcional (armazenado localmente)
-
-## 📚 Documentos
-
-- `GUIA_ASSINATURA_PLAY_STORE.md` (configuração e teste de assinaturas)
-- `RELATORIO_PLAY_STORE.md` (checklist de conformidade para publicação)
-
-## 📝 Licença
-
-Este projeto é propriedade de Focodev Sistemas.
-
-## 👨‍💻 Desenvolvimento
-
-**Package Name:** `com.focodevsistemas.gerenciamento`  
-**Versão:** 1.0  
-**Build:** 1
-
-## 🐛 Reportar Problemas
-
-Se encontrar algum problema ou tiver sugestões:
-1. Abra uma issue no repositório
-2. Descreva o problema detalhadamente
-3. Inclua logs se possível
-
-## 📞 Suporte
-
-Para suporte, entre em contato através do app ou pelo repositório.
-
-## 🔄 Atualizações
-
-O app verifica automaticamente por atualizações quando configurado com um repositório GitHub.
+- [GUIA_ASSINATURA_PLAY_STORE.md](GUIA_ASSINATURA_PLAY_STORE.md)
+- [RELATORIO_PLAY_STORE.md](RELATORIO_PLAY_STORE.md)
+- [Política de privacidade](https://github.com/Agsterr/privacy-policy)
 
 ---
 
-**Desenvolvido com ❤️ por Focodev Sistemas**
+## Privacidade
 
+Todos os dados ficam **no dispositivo**. Nenhuma informação é enviada para servidores externos.
 
+---
 
+## Autor
 
-
-
-
+**Focodev Sistemas** — Agster Junior da Costa Santos
