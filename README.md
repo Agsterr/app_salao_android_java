@@ -28,7 +28,7 @@ App Android completo para **pequenos negócios** — controle de clientes, produ
 - Cadastro e vínculo com agendamentos
 
 ### Segurança e backup
-- Login com senha, conta admin padrão
+- Login com senha e conta administrador configurada no primeiro acesso
 - Backup e restauração local dos dados
 
 ### Assinatura premium
@@ -96,17 +96,6 @@ Assinatura obrigatória via `keystore.properties` (não commitar) ou variáveis 
 - `RELEASE_STORE_PASSWORD`
 - `RELEASE_KEY_ALIAS`
 - `RELEASE_KEY_PASSWORD`
-
----
-
-## Credenciais padrão
-
-| Campo | Valor |
-|-------|-------|
-| Usuário | `admin` |
-| Senha | `admin` |
-
-Altere a senha após o primeiro acesso.
 
 ---
 
