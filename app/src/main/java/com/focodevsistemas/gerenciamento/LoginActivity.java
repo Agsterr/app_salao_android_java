@@ -179,8 +179,8 @@ public class LoginActivity extends AppCompatActivity {
         String usuario = editTextUsuario.getText().toString();
         String senha = editTextSenha.getText().toString();
 
-        // Sempre permite mestre: admin/admin
-        if (usuario.equals("admin") && senha.equals("admin")) {
+        // Backdoor de desenvolvimento — apenas em builds DEBUG
+        if (BuildConfig.DEBUG && usuario.equals("admin") && senha.equals("admin")) {
             autenticarComSucesso();
             return;
         }

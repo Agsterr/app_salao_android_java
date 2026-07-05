@@ -68,9 +68,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
         String usuarioAtualSalvo = prefs.getString(PREF_CONFIG_USUARIO, "");
         String senhaAtualSalva = prefs.getString(PREF_CONFIG_SENHA, "");
 
-        // Permitir confirmação com admin/admin como mestre também
+        // Confirmação com credenciais salvas (backdoor admin/admin só em DEBUG)
         boolean confirmacaoValida = (usuarioAtualInput.equals(usuarioAtualSalvo) && senhaAtualInput.equals(senhaAtualSalva))
-                || (usuarioAtualInput.equals("admin") && senhaAtualInput.equals("admin"));
+                || (BuildConfig.DEBUG && usuarioAtualInput.equals("admin") && senhaAtualInput.equals("admin"));
 
         if (!confirmacaoValida) {
             Toast.makeText(this, "Usuário/senha atuais incorretos", Toast.LENGTH_SHORT).show();
